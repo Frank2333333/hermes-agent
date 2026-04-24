@@ -66,6 +66,7 @@ import requests
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 from agent.auxiliary_client import call_llm
+from enterprise_policy import is_enterprise_enabled
 from hermes_constants import get_hermes_home
 
 try:
@@ -318,6 +319,9 @@ def _get_cloud_provider() -> Optional[CloudBrowserProvider]:
         return _cached_cloud_provider
 
     _cloud_provider_resolved = True
+    if is_enterprise_enabled():
+        _cached_cloud_provider = None
+        return None
     try:
         from hermes_cli.config import read_raw_config
         cfg = read_raw_config()
@@ -1465,6 +1469,20 @@ def browser_navigate(url: str, task_id: Optional[str] = None) -> str:
                 "success": False,
                 "error": "Blocked: redirect landed on a private/internal address",
             })
+
+        if final_url:
+            final_blocked = check_website_access(final_url)
+            if final_blocked:
+                _run_browser_command(effective_task_id, "open", ["about:blank"], timeout=10)
+                return json.dumps({
+                    "success": False,
+                    "error": final_blocked["message"],
+                    "blocked_by_policy": {
+                        "host": final_blocked["host"],
+                        "rule": final_blocked["rule"],
+                        "source": final_blocked["source"],
+                    },
+                })
 
         response = {
             "success": True,

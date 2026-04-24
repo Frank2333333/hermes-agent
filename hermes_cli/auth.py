@@ -38,6 +38,7 @@ from typing import Any, Dict, List, Optional
 import httpx
 import yaml
 
+from enterprise_policy import is_enterprise_enabled
 from hermes_cli.config import get_hermes_home, get_config_path, read_raw_config
 from hermes_constants import OPENROUTER_BASE_URL
 
@@ -1024,6 +1025,52 @@ def resolve_provider(
         "llama.cpp": "custom", "llama-cpp": "custom",
     }
     normalized = _PROVIDER_ALIASES.get(normalized, normalized)
+
+    if is_enterprise_enabled():
+        if normalized == "custom":
+            return "custom"
+        if normalized != "auto":
+            _config_hint = _get_config_hint_for_unknown_provider(normalized)
+            msg = (
+                f"Provider '{normalized}' is disabled in the enterprise build. "
+                "Only self-hosted/custom endpoints are allowed."
+            )
+            if _config_hint:
+                msg += f"\n\n{_config_hint}"
+            raise AuthError(msg, code="invalid_provider")
+
+        if explicit_api_key or explicit_base_url:
+            return "custom"
+
+        try:
+            config = read_raw_config() or {}
+        except Exception:
+            config = {}
+
+        model_cfg = config.get("model")
+        if isinstance(model_cfg, dict):
+            cfg_provider = str(model_cfg.get("provider") or "").strip().lower()
+            cfg_base_url = str(model_cfg.get("base_url") or "").strip()
+            if cfg_provider == "custom" or cfg_base_url:
+                return "custom"
+
+        providers_cfg = config.get("providers")
+        if isinstance(providers_cfg, dict) and providers_cfg:
+            return "custom"
+
+        custom_providers_cfg = config.get("custom_providers")
+        if isinstance(custom_providers_cfg, list) and custom_providers_cfg:
+            return "custom"
+
+        if os.getenv("OPENAI_BASE_URL", "").strip():
+            return "custom"
+
+        raise AuthError(
+            "No self-hosted/custom model endpoint is configured. "
+            "Set model.provider=custom with model.base_url, configure a saved custom provider, "
+            "or pass an explicit base_url.",
+            code="enterprise_provider_missing",
+        )
 
     if normalized == "openrouter":
         return "openrouter"

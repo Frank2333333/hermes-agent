@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
+from enterprise_policy import get_enterprise_url_block
 from hermes_constants import get_hermes_home
 
 logger = logging.getLogger(__name__)
@@ -244,7 +245,15 @@ def check_website_access(url: str, config_path: Optional[Path] = None) -> Option
     if config_path is None:
         with _cache_lock:
             if _cached_policy is not None and not _cached_policy.get("enabled"):
-                return None
+                enterprise_block = get_enterprise_url_block(url, config_path=config_path)
+                if enterprise_block:
+                    enterprise_block["url"] = url
+                return enterprise_block
+
+    enterprise_block = get_enterprise_url_block(url, config_path=config_path)
+    if enterprise_block:
+        enterprise_block["url"] = url
+        return enterprise_block
 
     host = _extract_host_from_urlish(url)
     if not host:

@@ -274,6 +274,7 @@ from gateway.config import (
     GatewayConfig,
     load_gateway_config,
 )
+from enterprise_policy import is_gateway_platform_allowed
 from gateway.session import (
     SessionStore,
     SessionSource,
@@ -2739,6 +2740,13 @@ class GatewayRunner:
         config: Any
     ) -> Optional[BasePlatformAdapter]:
         """Create the appropriate adapter for a platform."""
+        if not is_gateway_platform_allowed(platform.value):
+            logger.warning(
+                "Enterprise gateway mode: refusing to start disabled platform '%s'",
+                platform.value,
+            )
+            return None
+
         if hasattr(config, "extra") and isinstance(config.extra, dict):
             config.extra.setdefault(
                 "group_sessions_per_user",

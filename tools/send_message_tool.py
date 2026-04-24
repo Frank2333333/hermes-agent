@@ -15,6 +15,7 @@ import ssl
 import time
 
 from agent.redact import redact_sensitive_text
+from enterprise_policy import is_enterprise_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +135,12 @@ SEND_MESSAGE_SCHEMA = {
 
 def send_message_tool(args, **kw):
     """Handle cross-channel send_message tool calls."""
+    if is_enterprise_enabled():
+        return tool_error(
+            "send_message is disabled in the enterprise build. "
+            "Consumer and public messaging integrations have been removed."
+        )
+
     action = args.get("action", "send")
 
     if action == "list":

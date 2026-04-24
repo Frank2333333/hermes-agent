@@ -16,10 +16,25 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 from enum import Enum
 
+from enterprise_policy import filter_platform_mapping, is_gateway_platform_allowed
 from hermes_cli.config import get_hermes_home
 from utils import is_truthy_value
 
 logger = logging.getLogger(__name__)
+
+
+def _prune_disallowed_platforms(config: "GatewayConfig") -> None:
+    removed = [
+        getattr(platform, "value", str(platform))
+        for platform in list(config.platforms.keys())
+        if not is_gateway_platform_allowed(getattr(platform, "value", str(platform)))
+    ]
+    if removed:
+        logger.info(
+            "Enterprise gateway mode: dropping unsupported platforms: %s",
+            ", ".join(sorted(removed)),
+        )
+    config.platforms = filter_platform_mapping(config.platforms)
 
 
 def _coerce_bool(value: Any, default: bool = True) -> bool:
@@ -269,6 +284,8 @@ class GatewayConfig:
         """Return list of platforms that are enabled and configured."""
         connected = []
         for platform, config in self.platforms.items():
+            if not is_gateway_platform_allowed(platform.value):
+                continue
             if not config.enabled:
                 continue
             # Weixin requires both a token and an account_id
@@ -767,6 +784,7 @@ def load_gateway_config() -> GatewayConfig:
 
     # Override with environment variables
     _apply_env_overrides(config)
+    _prune_disallowed_platforms(config)
     
     # --- Validate loaded values ---
     _validate_gateway_config(config)

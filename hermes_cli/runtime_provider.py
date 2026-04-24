@@ -9,6 +9,11 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
+from enterprise_policy import (
+    ensure_enterprise_url_allowed,
+    is_enterprise_enabled,
+    validate_provider_or_raise,
+)
 from hermes_cli import auth as auth_mod
 from agent.credential_pool import CredentialPool, PooledCredential, get_custom_provider_pool_key, load_pool
 from hermes_cli.auth import (
@@ -104,6 +109,72 @@ def _get_model_config() -> Dict[str, Any]:
     if isinstance(model_cfg, str) and model_cfg.strip():
         return {"default": model_cfg.strip()}
     return {}
+
+
+def _resolve_enterprise_runtime(
+    *,
+    requested_provider: str,
+    explicit_api_key: Optional[str] = None,
+    explicit_base_url: Optional[str] = None,
+) -> Dict[str, Any]:
+    validate_provider_or_raise(requested_provider, error_cls=AuthError)
+
+    custom_runtime = _resolve_named_custom_runtime(
+        requested_provider=requested_provider,
+        explicit_api_key=explicit_api_key,
+        explicit_base_url=explicit_base_url,
+    )
+    if custom_runtime:
+        ensure_enterprise_url_allowed(
+            custom_runtime.get("base_url", ""),
+            error_cls=AuthError,
+        )
+        custom_runtime["requested_provider"] = requested_provider
+        return custom_runtime
+
+    model_cfg = _get_model_config()
+    cfg_provider = str(model_cfg.get("provider") or "").strip().lower()
+    if cfg_provider and cfg_provider not in {"auto", "custom"}:
+        raise AuthError(
+            f"Provider '{cfg_provider}' is disabled in the enterprise build. "
+            "Only self-hosted/custom endpoints are allowed."
+        )
+
+    base_url = (
+        str(explicit_base_url or "").strip()
+        or str(model_cfg.get("base_url") or "").strip()
+        or os.getenv("OPENAI_BASE_URL", "").strip()
+    ).rstrip("/")
+    if not base_url:
+        raise AuthError(
+            "No self-hosted/custom model endpoint is configured. "
+            "Set model.provider=custom with model.base_url or pass an explicit base_url.",
+            code="enterprise_provider_missing",
+        )
+
+    ensure_enterprise_url_allowed(base_url, error_cls=AuthError)
+
+    api_key_candidates = [
+        str(explicit_api_key or "").strip(),
+        str(model_cfg.get("api_key") or "").strip(),
+        str(model_cfg.get("api") or "").strip(),
+        os.getenv("OPENAI_API_KEY", "").strip(),
+    ]
+    api_key = next(
+        (candidate for candidate in api_key_candidates if has_usable_secret(candidate)),
+        "",
+    ) or "no-key-required"
+
+    return {
+        "provider": "custom",
+        "api_mode": _parse_api_mode(model_cfg.get("api_mode"))
+        or _detect_api_mode_for_url(base_url)
+        or "chat_completions",
+        "base_url": base_url,
+        "api_key": api_key,
+        "source": "enterprise",
+        "requested_provider": requested_provider,
+    }
 
 
 def _provider_supports_explicit_api_mode(provider: Optional[str], configured_provider: Optional[str] = None) -> bool:
@@ -410,6 +481,9 @@ def _resolve_named_custom_runtime(
     if not base_url:
         return None
 
+    if is_enterprise_enabled():
+        ensure_enterprise_url_allowed(base_url, error_cls=AuthError)
+
     # Check if a credential pool exists for this custom endpoint
     pool_result = _try_resolve_from_custom_pool(base_url, "custom", custom_provider.get("api_mode"))
     if pool_result:
@@ -692,6 +766,13 @@ def resolve_runtime_provider(
 ) -> Dict[str, Any]:
     """Resolve runtime provider credentials for agent execution."""
     requested_provider = resolve_requested_provider(requested)
+
+    if is_enterprise_enabled():
+        return _resolve_enterprise_runtime(
+            requested_provider=requested_provider,
+            explicit_api_key=explicit_api_key,
+            explicit_base_url=explicit_base_url,
+        )
 
     custom_runtime = _resolve_named_custom_runtime(
         requested_provider=requested_provider,

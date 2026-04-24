@@ -30,7 +30,7 @@ from typing import List, Dict, Any, Set, Optional
 # Edit this once to update all platforms simultaneously.
 _HERMES_CORE_TOOLS = [
     # Web
-    "web_search", "web_extract",
+    "web_extract",
     # Terminal + process management
     "terminal", "process",
     # File manipulation
@@ -56,8 +56,6 @@ _HERMES_CORE_TOOLS = [
     "execute_code", "delegate_task",
     # Cronjob management
     "cronjob",
-    # Cross-platform messaging (gated on gateway running via check_fn)
-    "send_message",
     # Home Assistant smart home control (gated on HASS_TOKEN via check_fn)
     "ha_list_entities", "ha_get_state", "ha_list_services", "ha_call_service",
 ]
@@ -68,14 +66,14 @@ _HERMES_CORE_TOOLS = [
 TOOLSETS = {
     # Basic toolsets - individual tool categories
     "web": {
-        "description": "Web research and content extraction tools",
-        "tools": ["web_search", "web_extract"],
+        "description": "Web content extraction tools",
+        "tools": ["web_extract"],
         "includes": []  # No other toolsets included
     },
     
     "search": {
-        "description": "Web search only (no content extraction/scraping)",
-        "tools": ["web_search"],
+        "description": "Web search is disabled in the enterprise build",
+        "tools": [],
         "includes": []
     },
     
@@ -110,12 +108,12 @@ TOOLSETS = {
     },
     
     "browser": {
-        "description": "Browser automation for web interaction (navigate, click, type, scroll, iframes, hold-click) with web search for finding URLs",
+        "description": "Browser automation for approved intranet web interaction",
         "tools": [
             "browser_navigate", "browser_snapshot", "browser_click",
             "browser_type", "browser_scroll", "browser_back",
             "browser_press", "browser_get_images",
-            "browser_vision", "browser_console", "browser_cdp", "web_search"
+            "browser_vision", "browser_console", "browser_cdp"
         ],
         "includes": []
     },
@@ -127,8 +125,8 @@ TOOLSETS = {
     },
     
     "messaging": {
-        "description": "Cross-platform messaging: send messages to Telegram, Discord, Slack, SMS, etc.",
-        "tools": ["send_message"],
+        "description": "Outbound consumer messaging is disabled in the enterprise build",
+        "tools": [],
         "includes": []
     },
     
@@ -234,14 +232,13 @@ TOOLSETS = {
     # ==========================================================================
     # Full Hermes toolsets (CLI + messaging platforms)
     #
-    # All platforms share the same core tools (including send_message,
-    # which is gated on gateway running via its check_fn).
+    # All internal entrypoints share the same core tools.
     # ==========================================================================
 
     "hermes-acp": {
         "description": "Editor integration (VS Code, Zed, JetBrains) — coding-focused tools without messaging, audio, or clarify UI",
         "tools": [
-            "web_search", "web_extract",
+            "web_extract",
             "terminal", "process",
             "read_file", "write_file", "patch", "search_files",
             "vision_analyze",
@@ -258,10 +255,10 @@ TOOLSETS = {
     },
 
     "hermes-api-server": {
-        "description": "OpenAI-compatible API server — full agent tools accessible via HTTP (no interactive UI tools like clarify or send_message)",
+        "description": "OpenAI-compatible API server — full agent tools accessible via HTTP",
         "tools": [
             # Web
-            "web_search", "web_extract",
+            "web_extract",
             # Terminal + process management
             "terminal", "process",
             # File manipulation
@@ -408,9 +405,9 @@ TOOLSETS = {
     },
 
     "hermes-gateway": {
-        "description": "Gateway toolset - union of all messaging platform tools",
+        "description": "Gateway toolset - internal-only platform entrypoints",
         "tools": [],
-        "includes": ["hermes-telegram", "hermes-discord", "hermes-whatsapp", "hermes-slack", "hermes-signal", "hermes-bluebubbles", "hermes-homeassistant", "hermes-email", "hermes-sms", "hermes-mattermost", "hermes-matrix", "hermes-dingtalk", "hermes-feishu", "hermes-wecom", "hermes-wecom-callback", "hermes-weixin", "hermes-qqbot", "hermes-webhook"]
+        "includes": ["hermes-homeassistant", "hermes-webhook"]
     }
 }
 
@@ -711,7 +708,7 @@ if __name__ == "__main__":
     create_custom_toolset(
         name="my_custom",
         description="My custom toolset for specific tasks",
-        tools=["web_search"],
+        tools=["web_extract"],
         includes=["terminal", "vision"]
     )
     custom_info = get_toolset_info("my_custom")

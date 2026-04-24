@@ -59,6 +59,7 @@ from tools.managed_tool_gateway import (
     read_nous_access_token as _read_nous_access_token,
     resolve_managed_tool_gateway,
 )
+from enterprise_policy import ensure_enterprise_url_allowed, is_enterprise_enabled
 from tools.tool_backend_helpers import managed_nous_tools_enabled, prefers_gateway
 from tools.url_safety import is_safe_url
 from tools.website_policy import check_website_access
@@ -105,6 +106,28 @@ def _get_backend() -> str:
             return backend
 
     return "firecrawl"  # default (backward compat)
+
+
+def _ensure_enterprise_web_backend_allowed(backend: str) -> None:
+    if not is_enterprise_enabled():
+        return
+    if backend != "firecrawl":
+        raise ValueError(
+            "Only self-hosted Firecrawl is allowed for web extraction/crawl in the enterprise build. "
+            "web_search and public web backends are disabled."
+        )
+    direct_config = _get_direct_firecrawl_config()
+    if direct_config is None:
+        raise ValueError(
+            "Enterprise web extraction/crawl requires a self-hosted Firecrawl endpoint via FIRECRAWL_API_URL."
+        )
+    kwargs, _ = direct_config
+    api_url = str(kwargs.get("api_url") or "").strip()
+    if not api_url:
+        raise ValueError(
+            "Enterprise web extraction/crawl requires FIRECRAWL_API_URL. Cloud Firecrawl is disabled."
+        )
+    ensure_enterprise_url_allowed(api_url)
 
 
 def _is_backend_available(backend: str) -> bool:
@@ -1078,12 +1101,19 @@ def web_search_tool(query: str, limit: int = 5) -> str:
     }
     
     try:
+        if is_enterprise_enabled():
+            return tool_error(
+                "web_search is disabled in the enterprise build. "
+                "Use web_extract or browser tools against approved intranet URLs instead."
+            )
+
         from tools.interrupt import is_interrupted
         if is_interrupted():
             return tool_error("Interrupted", success=False)
 
         # Dispatch to the configured backend
         backend = _get_backend()
+        _ensure_enterprise_web_backend_allowed(backend)
         if backend == "parallel":
             response_data = _parallel_search(query, limit)
             debug_call_data["results_count"] = len(response_data.get("data", {}).get("web", []))
@@ -1222,12 +1252,14 @@ async def web_extract_tool(
     
     try:
         logger.info("Extracting content from %d URL(s)", len(urls))
+        backend = _get_backend()
+        _ensure_enterprise_web_backend_allowed(backend)
 
         # ── SSRF protection — filter out private/internal URLs before any backend ──
         safe_urls = []
         ssrf_blocked: List[Dict[str, Any]] = []
         for url in urls:
-            if not is_safe_url(url):
+            if not is_enterprise_enabled() and not is_safe_url(url):
                 ssrf_blocked.append({
                     "url": url, "title": "", "content": "",
                     "error": "Blocked: URL targets a private or internal network address",
@@ -1239,8 +1271,6 @@ async def web_extract_tool(
         if not safe_urls:
             results = []
         else:
-            backend = _get_backend()
-
             if backend == "parallel":
                 results = await _parallel_extract(safe_urls)
             elif backend == "exa":
@@ -1542,6 +1572,7 @@ async def web_crawl_tool(
         effective_model = model or _get_default_summarizer_model()
         auxiliary_available = check_auxiliary_model()
         backend = _get_backend()
+        _ensure_enterprise_web_backend_allowed(backend)
 
         # Tavily supports crawl via its /crawl endpoint
         if backend == "tavily":
@@ -1550,7 +1581,7 @@ async def web_crawl_tool(
                 url = f'https://{url}'
 
             # SSRF protection — block private/internal addresses
-            if not is_safe_url(url):
+            if not is_enterprise_enabled() and not is_safe_url(url):
                 return json.dumps({"results": [{"url": url, "title": "", "content": "",
                     "error": "Blocked: URL targets a private or internal network address"}]}, ensure_ascii=False)
 
@@ -1644,7 +1675,7 @@ async def web_crawl_tool(
         logger.info("Crawling %s%s", url, instructions_text)
         
         # SSRF protection — block private/internal addresses
-        if not is_safe_url(url):
+        if not is_enterprise_enabled() and not is_safe_url(url):
             return json.dumps({"results": [{"url": url, "title": "", "content": "",
                 "error": "Blocked: URL targets a private or internal network address"}]}, ensure_ascii=False)
 

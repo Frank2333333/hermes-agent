@@ -1610,6 +1610,7 @@ def _load_mcp_config() -> Dict[str, dict]:
     ``os.environ`` (which includes ``~/.hermes/.env`` loaded at startup).
     """
     try:
+        from enterprise_policy import get_enterprise_url_block, is_enterprise_enabled
         from hermes_cli.config import load_config
         config = load_config()
         servers = config.get("mcp_servers")
@@ -1621,7 +1622,27 @@ def _load_mcp_config() -> Dict[str, dict]:
             load_hermes_dotenv()
         except Exception:
             pass
-        return {name: _interpolate_env_vars(cfg) for name, cfg in servers.items()}
+        interpolated = {name: _interpolate_env_vars(cfg) for name, cfg in servers.items()}
+        if not is_enterprise_enabled():
+            return interpolated
+
+        filtered: Dict[str, dict] = {}
+        for name, cfg in interpolated.items():
+            if not isinstance(cfg, dict):
+                continue
+            if "url" not in cfg:
+                filtered[name] = cfg
+                continue
+            blocked = get_enterprise_url_block(str(cfg.get("url") or ""))
+            if blocked:
+                logger.warning(
+                    "Dropping MCP server '%s': remote URL '%s' is not allowed by enterprise policy",
+                    name,
+                    cfg.get("url"),
+                )
+                continue
+            filtered[name] = cfg
+        return filtered
     except Exception as exc:
         logger.debug("Failed to load MCP config: %s", exc)
         return {}

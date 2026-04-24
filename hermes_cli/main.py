@@ -1408,6 +1408,7 @@ def select_provider_and_model(args=None):
         AuthError,
         format_auth_error,
     )
+    from enterprise_policy import is_enterprise_enabled
     from hermes_cli.config import (
         get_compatible_custom_providers,
         load_config,
@@ -1455,7 +1456,8 @@ def select_provider_and_model(args=None):
     print()
 
     # Step 1: Provider selection — flat list from CANONICAL_PROVIDERS
-    all_providers = [(p.slug, p.tui_desc) for p in CANONICAL_PROVIDERS]
+    enterprise_mode = is_enterprise_enabled()
+    all_providers = [] if enterprise_mode else [(p.slug, p.tui_desc) for p in CANONICAL_PROVIDERS]
 
     def _named_custom_provider_map(cfg) -> dict[str, dict[str, str]]:
         custom_provider_map = {}
@@ -1506,13 +1508,14 @@ def select_provider_and_model(args=None):
         else:
             ordered.append((key, label))
 
-    ordered.append(("custom", "Custom endpoint (enter URL manually)"))
+    ordered.append(("custom", "Custom endpoint (self-hosted OpenAI-compatible)"))
     _has_saved_custom_list = isinstance(config.get("custom_providers"), list) and bool(
         config.get("custom_providers")
     )
     if _has_saved_custom_list:
         ordered.append(("remove-custom", "Remove a saved custom provider"))
-    ordered.append(("aux-config", "Configure auxiliary models..."))
+    if not enterprise_mode:
+        ordered.append(("aux-config", "Configure auxiliary models..."))
     ordered.append(("cancel", "Leave unchanged"))
 
     provider_idx = _prompt_provider_choice(

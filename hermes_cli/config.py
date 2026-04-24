@@ -455,6 +455,15 @@ DEFAULT_CONFIG = {
         },
     },
 
+    # Enterprise hardening profile: this branch is intranet-only by default.
+    "enterprise": {
+        "enabled": True,
+        "network_allowlist": {
+            "hosts": [],
+            "cidrs": [],
+        },
+    },
+
     # Filesystem checkpoints — automatic snapshots before destructive file ops.
     # When enabled, the agent takes a snapshot of the working directory once per
     # conversation turn (on first write_file/patch call).  Use /rollback to restore.
@@ -922,7 +931,7 @@ DEFAULT_CONFIG = {
     },
 
     # Config schema version - bump this when adding new required fields
-    "_config_version": 22,
+    "_config_version": 23,
 }
 
 # =============================================================================
