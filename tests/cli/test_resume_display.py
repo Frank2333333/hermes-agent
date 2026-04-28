@@ -74,7 +74,7 @@ def _tool_call_history():
                 {
                     "id": "call_1",
                     "type": "function",
-                    "function": {"name": "web_search", "arguments": '{"query":"python tutorials"}'},
+                    "function": {"name": "web_extract", "arguments": '{"query":"python tutorials"}'},
                 },
                 {
                     "id": "call_2",
@@ -159,7 +159,7 @@ class TestDisplayResumedHistory:
         output = self._capture_display(cli)
 
         assert "2 tool calls" in output
-        assert "web_search" in output
+        assert "web_extract" in output
         assert "web_extract" in output
 
     def test_long_user_message_truncated(self):

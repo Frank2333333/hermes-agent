@@ -244,7 +244,7 @@ class TestStreamingAccumulator:
         chunks = [
             _make_stream_chunk(content="Let me check"),
             _make_stream_chunk(tool_calls=[
-                _make_tool_call_delta(index=0, tc_id="call_456", name="web_search")
+                _make_tool_call_delta(index=0, tc_id="call_456", name="web_extract")
             ]),
             _make_stream_chunk(tool_calls=[
                 _make_tool_call_delta(index=0, arguments='{"query": "test"}')

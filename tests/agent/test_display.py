@@ -1,4 +1,4 @@
-"""Tests for agent/display.py â€” build_tool_preview() and inline diff previews."""
+"""Tests for agent/display.py â€?build_tool_preview() and inline diff previews."""
 
 import os
 import pytest
@@ -31,8 +31,8 @@ class TestBuildToolPreview:
         assert result is not None
         assert "ls -la" in result
 
-    def test_web_search_preview(self):
-        result = build_tool_preview("web_search", {"query": "hello world"})
+    def test_web_extract_preview(self):
+        result = build_tool_preview("web_extract", {"query": "hello world"})
         assert result is not None
         assert "hello world" in result
 
@@ -125,7 +125,7 @@ class TestEditDiffPreview:
         assert any("48;2;" in line for line in rendered)
 
     def test_extract_edit_diff_ignores_non_edit_tools(self):
-        assert extract_edit_diff("web_search", '{"diff": "--- a\\n+++ b\\n"}') is None
+        assert extract_edit_diff("web_extract", '{"diff": "--- a\\n+++ b\\n"}') is None
 
     def test_extract_edit_diff_uses_local_snapshot_for_write_file(self, tmp_path):
         target = tmp_path / "note.txt"

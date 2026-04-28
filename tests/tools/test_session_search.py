@@ -82,10 +82,10 @@ class TestFormatConversation:
 
     def test_tool_message(self):
         msgs = [
-            {"role": "tool", "content": "search results", "tool_name": "web_search"},
+            {"role": "tool", "content": "search results", "tool_name": "web_extract"},
         ]
         result = _format_conversation(msgs)
-        assert "[TOOL:web_search]" in result
+        assert "[TOOL:web_extract]" in result
 
     def test_long_tool_output_truncated(self):
         msgs = [
@@ -100,13 +100,13 @@ class TestFormatConversation:
                 "role": "assistant",
                 "content": "",
                 "tool_calls": [
-                    {"function": {"name": "web_search"}},
+                    {"function": {"name": "web_extract"}},
                     {"function": {"name": "terminal"}},
                 ],
             },
         ]
         result = _format_conversation(msgs)
-        assert "web_search" in result
+        assert "web_extract" in result
         assert "terminal" in result
 
     def test_empty_messages(self):

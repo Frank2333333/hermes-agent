@@ -674,7 +674,7 @@ hermes model
 This saves the endpoint to `config.yaml` so it persists across sessions.
 
 :::caution `--jinja` is required for tool calling
-Without `--jinja`, llama-server ignores the `tools` parameter entirely. The model will try to call tools by writing JSON in its response text, but Hermes won't recognize it as a tool call — you'll see raw JSON like `{"name": "web_search", ...}` printed as a message instead of an actual search.
+Without `--jinja`, llama-server ignores the `tools` parameter entirely. The model will try to call tools by writing JSON in its response text, but Hermes won't recognize it as a tool call — you'll see raw JSON like `{"name": "web_extract", ...}` printed as a message instead of an actual search.
 
 Native tool calling support (best performance): Llama 3.x, Qwen 2.5 (including Coder), Hermes 2/3, Mistral, DeepSeek, Functionary. All other models use a generic handler that works but may be less efficient. See the [llama.cpp function calling docs](https://github.com/ggml-org/llama.cpp/blob/master/docs/function-calling.md) for the full list.
 
@@ -845,7 +845,7 @@ If you're running Hermes inside WSL2 and your model server on the Windows host, 
 
 #### Tool calls appear as text instead of executing
 
-The model outputs something like `{"name": "web_search", "arguments": {...}}` as a message instead of actually calling the tool.
+The model outputs something like `{"name": "web_extract", "arguments": {...}}` as a message instead of actually calling the tool.
 
 **Cause:** Your server doesn't have tool calling enabled, or the model doesn't support it through the server's tool calling implementation.
 

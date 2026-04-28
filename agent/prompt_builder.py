@@ -218,7 +218,7 @@ OPENAI_MODEL_EXECUTION_GUIDANCE = (
     "- System state: OS, CPU, memory, disk, ports, processes → use terminal\n"
     "- File contents, sizes, line counts → use read_file, search_files, or terminal\n"
     "- Git history, branches, diffs → use terminal\n"
-    "- Current facts (weather, news, versions) → use web_search\n"
+    "- Current facts (weather, news, versions) → use web_extract\n"
     "Your memory and user profile describe the USER, not the system you are "
     "running on. The execution environment may differ from what the user profile "
     "says about their personal setup.\n"
@@ -253,7 +253,7 @@ OPENAI_MODEL_EXECUTION_GUIDANCE = (
     "<missing_context>\n"
     "- If required context is missing, do NOT guess or hallucinate an answer.\n"
     "- Use the appropriate lookup tool when missing information is retrievable "
-    "(search_files, web_search, read_file, etc.).\n"
+    "(search_files, web_extract, read_file, etc.).\n"
     "- Ask a clarifying question only when the information cannot be retrieved by tools.\n"
     "- If you must proceed with incomplete information, label assumptions explicitly.\n"
     "</missing_context>"
@@ -795,7 +795,7 @@ def build_skills_system_prompt(
             "than to miss critical steps, pitfalls, or established workflows. "
             "Skills contain specialized knowledge — API endpoints, tool-specific commands, "
             "and proven workflows that outperform general-purpose approaches. Load the skill "
-            "even if you think you could handle the task with basic tools like web_search or terminal. "
+            "even if you think you could handle the task with basic tools like web_extract or terminal. "
             "Skills also encode the user's preferred approach, conventions, and quality standards "
             "for tasks like code review, planning, and testing — load them even for tasks you "
             "already know how to do, because the skill defines how it should be done here.\n"
@@ -835,7 +835,6 @@ def build_nous_subscription_prompt(valid_tool_names: "set[str] | None" = None) -
 
     valid_names = set(valid_tool_names or set())
     relevant_tool_names = {
-        "web_search",
         "web_extract",
         "browser_navigate",
         "browser_snapshot",

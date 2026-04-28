@@ -22,7 +22,7 @@ Hermes supports multiple AI inference providers out of the box. Use `hermes mode
 
 ## Web Search Backends
 
-The `web_search` and `web_extract` tools support four backend providers, configured via `config.yaml` or `hermes tools`:
+The `web_extract` and `web_extract` tools support four backend providers, configured via `config.yaml` or `hermes tools`:
 
 | Backend | Env Var | Search | Extract | Crawl |
 |---------|---------|--------|---------|-------|

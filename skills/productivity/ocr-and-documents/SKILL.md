@@ -33,18 +33,18 @@ Only use local extraction when: the file is local, web_extract fails, or you nee
 
 | Feature | pymupdf (~25MB) | marker-pdf (~3-5GB) |
 |---------|-----------------|---------------------|
-| **Text-based PDF** | ‚úÖ | ‚úÖ |
-| **Scanned PDF (OCR)** | ‚ùå | ‚úÖ (90+ languages) |
-| **Tables** | ‚úÖ (basic) | ‚úÖ (high accuracy) |
-| **Equations / LaTeX** | ‚ùå | ‚úÖ |
-| **Code blocks** | ‚ùå | ‚úÖ |
-| **Forms** | ‚ùå | ‚úÖ |
-| **Headers/footers removal** | ‚ùå | ‚úÖ |
-| **Reading order detection** | ‚ùå | ‚úÖ |
-| **Images extraction** | ‚úÖ (embedded) | ‚úÖ (with context) |
-| **Images ‚Üí text (OCR)** | ‚ùå | ‚úÖ |
-| **EPUB** | ‚úÖ | ‚úÖ |
-| **Markdown output** | ‚úÖ (via pymupdf4llm) | ‚úÖ (native, higher quality) |
+| **Text-based PDF** | ‚ú?| ‚ú?|
+| **Scanned PDF (OCR)** | ‚ù?| ‚ú?(90+ languages) |
+| **Tables** | ‚ú?(basic) | ‚ú?(high accuracy) |
+| **Equations / LaTeX** | ‚ù?| ‚ú?|
+| **Code blocks** | ‚ù?| ‚ú?|
+| **Forms** | ‚ù?| ‚ú?|
+| **Headers/footers removal** | ‚ù?| ‚ú?|
+| **Reading order detection** | ‚ù?| ‚ú?|
+| **Images extraction** | ‚ú?(embedded) | ‚ú?(with context) |
+| **Images ‚Ü?text (OCR)** | ‚ù?| ‚ú?|
+| **EPUB** | ‚ú?| ‚ú?|
+| **Markdown output** | ‚ú?(via pymupdf4llm) | ‚ú?(native, higher quality) |
 | **Install size** | ~25MB | ~3-5GB (PyTorch + models) |
 | **Speed** | Instant | ~1-14s/page (CPU), ~0.2s/page (GPU) |
 
@@ -119,12 +119,12 @@ web_extract(urls=["https://arxiv.org/abs/2402.03300"])
 web_extract(urls=["https://arxiv.org/pdf/2402.03300"])
 
 # Search
-web_search(query="arxiv GRPO reinforcement learning 2026")
+web_extract(query="arxiv GRPO reinforcement learning 2026")
 ```
 
 ## Split, Merge & Search
 
-pymupdf handles these natively ‚Äî use `execute_code` or inline Python:
+pymupdf handles these natively ‚Ä?use `execute_code` or inline Python:
 
 ```python
 # Split: extract pages 1-5 to a new PDF
@@ -156,16 +156,16 @@ for i, page in enumerate(doc):
         print(page.get_text("text"))
 ```
 
-No extra dependencies needed ‚Äî pymupdf covers split, merge, search, and text extraction in one package.
+No extra dependencies needed ‚Ä?pymupdf covers split, merge, search, and text extraction in one package.
 
 ---
 
 ## Notes
 
 - `web_extract` is always first choice for URLs
-- pymupdf is the safe default ‚Äî instant, no models, works everywhere
-- marker-pdf is for OCR, scanned docs, equations, complex layouts ‚Äî install only when needed
+- pymupdf is the safe default ‚Ä?instant, no models, works everywhere
+- marker-pdf is for OCR, scanned docs, equations, complex layouts ‚Ä?install only when needed
 - Both helper scripts accept `--help` for full usage
 - marker-pdf downloads ~2.5GB of models to `~/.cache/huggingface/` on first use
-- For Word docs: `pip install python-docx` (better than OCR ‚Äî parses actual structure)
+- For Word docs: `pip install python-docx` (better than OCR ‚Ä?parses actual structure)
 - For PowerPoint: see the `powerpoint` skill (uses python-pptx)

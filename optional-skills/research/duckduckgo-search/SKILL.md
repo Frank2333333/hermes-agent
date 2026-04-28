@@ -1,6 +1,6 @@
 ---
 name: duckduckgo-search
-description: Free web search via DuckDuckGo â€” text, news, images, videos. No API key needed. Prefer the `ddgs` CLI when installed; use the Python DDGS library only after verifying that `ddgs` is available in the current runtime.
+description: Free web search via DuckDuckGo â€?text, news, images, videos. No API key needed. Prefer the `ddgs` CLI when installed; use the Python DDGS library only after verifying that `ddgs` is available in the current runtime.
 version: 1.3.0
 author: gamedevCloudy
 license: MIT
@@ -15,7 +15,7 @@ metadata:
 
 Free web search using DuckDuckGo. **No API key required.**
 
-Preferred when `web_search` is unavailable or unsuitable (for example when `FIRECRAWL_API_KEY` is not set). Can also be used as a standalone search path when DuckDuckGo results are specifically desired.
+Preferred when `web_extract` is unavailable or unsuitable (for example when `FIRECRAWL_API_KEY` is not set). Can also be used as a standalone search path when DuckDuckGo results are specifically desired.
 
 ## Detection Flow
 
@@ -82,7 +82,7 @@ ddgs text -q "fastapi tutorial" -m 5 -o json
 
 | Flag | Description | Example |
 |------|-------------|---------|
-| `-q` | Query â€” **required** | `-q "search terms"` |
+| `-q` | Query â€?**required** | `-q "search terms"` |
 | `-m` | Max results | `-m 5` |
 | `-r` | Region | `-r us-en` |
 | `-t` | Time limit | `-t w` (week) |
@@ -100,7 +100,7 @@ Avoid saying:
 - "`execute_code` includes `ddgs`"
 - "DuckDuckGo search works by default in `execute_code`"
 
-**Important:** `max_results` must always be passed as a **keyword argument** â€” positional usage raises an error on all methods.
+**Important:** `max_results` must always be passed as a **keyword argument** â€?positional usage raises an error on all methods.
 
 ### Text Search
 
@@ -184,7 +184,7 @@ Returns: `title`, `content`, `description`, `duration`, `provider`, `published`,
 
 ## Workflow: Search then Extract
 
-DuckDuckGo returns titles, URLs, and snippets â€” not full page content. To get full page content, search first and then extract the most relevant URL with `web_extract`, browser tools, or curl.
+DuckDuckGo returns titles, URLs, and snippets â€?not full page content. To get full page content, search first and then extract the most relevant URL with `web_extract`, browser tools, or curl.
 
 CLI example:
 

@@ -118,7 +118,7 @@ class TestStepCallbackNormalization:
         # This is the exact pattern from the docs
         prev_tools = [
             {"name": "terminal", "result": "ok"},
-            {"name": "web_search", "result": None},
+            {"name": "web_extract", "result": None},
         ]
 
         _names = []
@@ -130,4 +130,4 @@ class TestStepCallbackNormalization:
 
         # This must not raise — documented hook pattern
         result = ", ".join(_names)
-        assert result == "terminal, web_search"
+        assert result == "terminal, web_extract"

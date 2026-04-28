@@ -30,7 +30,7 @@ class TestGetToolset:
     def test_known_toolset(self):
         ts = get_toolset("web")
         assert ts is not None
-        assert "web_search" in ts["tools"]
+        assert "web_extract" in ts["tools"]
 
     def test_unknown_returns_none(self):
         assert get_toolset("nonexistent") is None
@@ -39,12 +39,12 @@ class TestGetToolset:
 class TestResolveToolset:
     def test_leaf_toolset(self):
         tools = resolve_toolset("web")
-        assert set(tools) == {"web_search", "web_extract"}
+        assert set(tools) == {"web_extract"}
 
     def test_composite_toolset(self):
         tools = resolve_toolset("debugging")
         assert "terminal" in tools
-        assert "web_search" in tools
+        assert "web_extract" in tools
         assert "web_extract" in tools
 
     def test_cycle_detection(self):
@@ -94,7 +94,6 @@ class TestResolveToolset:
 class TestResolveMultipleToolsets:
     def test_combines_and_deduplicates(self):
         tools = resolve_multiple_toolsets(["web", "terminal"])
-        assert "web_search" in tools
         assert "web_extract" in tools
         assert "terminal" in tools
         # No duplicates
@@ -138,7 +137,7 @@ class TestGetToolsetInfo:
         info = get_toolset_info("web")
         assert info["name"] == "web"
         assert info["is_composite"] is False
-        assert info["tool_count"] == 2
+        assert info["tool_count"] == 1
 
     def test_composite(self):
         info = get_toolset_info("debugging")
@@ -154,12 +153,12 @@ class TestCreateCustomToolset:
         create_custom_toolset(
             name="_test_custom",
             description="Test toolset",
-            tools=["web_search"],
+            tools=["web_extract"],
             includes=["terminal"],
         )
         try:
             tools = resolve_toolset("_test_custom")
-            assert "web_search" in tools
+            assert "web_extract" in tools
             assert "terminal" in tools
             assert validate_toolset("_test_custom") is True
         finally:

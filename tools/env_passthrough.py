@@ -75,7 +75,7 @@ def register_env_passthrough(var_names: Iterable[str]) -> None:
     ``_HERMES_PROVIDER_ENV_BLOCKLIST``) are rejected here to preserve
     the ``execute_code`` sandbox's credential-scrubbing guarantee per
     GHSA-rhgp-j443-p4rf. A skill that needs to talk to a Hermes-managed
-    provider should do so via the agent's main-process tools (web_search,
+    provider should do so via the agent's main-process tools (web_extract,
     web_extract, etc.) where the credential remains safely in the main
     process.
 

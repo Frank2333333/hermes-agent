@@ -270,9 +270,7 @@ def get_tool_definitions(
     available_tool_names = {t["function"]["name"] for t in filtered_tools}
 
     # Rebuild execute_code schema to only list sandbox tools that are actually
-    # available.  Without this, the model sees "web_search is available in
-    # execute_code" even when the API key isn't configured or the toolset is
-    # disabled (#560-discord).
+    # available.  Without this, the model can see sandbox helpers mentioned in`r`n    # execute_code even when the corresponding tool is unavailable.
     if "execute_code" in available_tool_names:
         from tools.code_execution_tool import SANDBOX_ALLOWED_TOOLS, build_execute_code_schema, _get_execution_mode
         sandbox_enabled = SANDBOX_ALLOWED_TOOLS & available_tool_names
@@ -281,51 +279,6 @@ def get_tool_definitions(
             if td.get("function", {}).get("name") == "execute_code":
                 filtered_tools[i] = {"type": "function", "function": dynamic_schema}
                 break
-
-    # Rebuild discord_server schema based on the bot's privileged intents
-    # (detected from GET /applications/@me) and the user's action allowlist
-    # in config.  Hides actions the bot's intents don't support so the
-    # model never attempts them, and annotates fetch_messages when the
-    # MESSAGE_CONTENT intent is missing.
-    if "discord_server" in available_tool_names:
-        try:
-            from tools.discord_tool import get_dynamic_schema
-            dynamic = get_dynamic_schema()
-        except Exception:  # pragma: no cover — defensive, fall back to static
-            dynamic = None
-        if dynamic is None:
-            # Tool filtered out entirely (empty allowlist or detection disabled
-            # the only remaining actions).  Drop it from the schema list.
-            filtered_tools = [
-                t for t in filtered_tools
-                if t.get("function", {}).get("name") != "discord_server"
-            ]
-            available_tool_names.discard("discord_server")
-        else:
-            for i, td in enumerate(filtered_tools):
-                if td.get("function", {}).get("name") == "discord_server":
-                    filtered_tools[i] = {"type": "function", "function": dynamic}
-                    break
-
-    # Strip web tool cross-references from browser_navigate description when
-    # web_search / web_extract are not available.  The static schema says
-    # "prefer web_search or web_extract" which causes the model to hallucinate
-    # those tools when they're missing.
-    if "browser_navigate" in available_tool_names:
-        web_tools_available = {"web_search", "web_extract"} & available_tool_names
-        if not web_tools_available:
-            for i, td in enumerate(filtered_tools):
-                if td.get("function", {}).get("name") == "browser_navigate":
-                    desc = td["function"].get("description", "")
-                    desc = desc.replace(
-                        " For simple information retrieval, prefer web_search or web_extract (faster, cheaper).",
-                        "",
-                    )
-                    filtered_tools[i] = {
-                        "type": "function",
-                        "function": {**td["function"], "description": desc},
-                    }
-                    break
 
     if not quiet_mode:
         if filtered_tools:

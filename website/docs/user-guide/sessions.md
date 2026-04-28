@@ -111,7 +111,7 @@ When you resume a session, Hermes displays a compact recap of the previous conve
 The recap:
 - Shows **user messages** (gold `●`) and **assistant responses** (green `◆`)
 - **Truncates** long messages (300 chars for user, 200 chars / 3 lines for assistant)
-- **Collapses tool calls** to a count with tool names (e.g., `[3 tool calls: terminal, web_search]`)
+- **Collapses tool calls** to a count with tool names (e.g., `[3 tool calls: terminal, web_extract]`)
 - **Hides** system messages, tool results, and internal reasoning
 - **Caps** at the last 10 exchanges with a "... N earlier messages ..." indicator
 - Uses **dim styling** to distinguish from the active conversation

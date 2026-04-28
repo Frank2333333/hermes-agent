@@ -706,12 +706,7 @@ def _tool_summary(name: str, result: str, duration_s: float | None) -> str | Non
     suffix = f" in {dur}" if dur else ""
     text = None
 
-    if name == "web_search" and isinstance(data, dict):
-        n = _count_list(data, "data", "web")
-        if n is not None:
-            text = f"Did {n} {'search' if n == 1 else 'searches'}"
-
-    elif name == "web_extract" and isinstance(data, dict):
+    if name == "web_extract" and isinstance(data, dict):
         n = _count_list(data, "results") or _count_list(data, "data", "results")
         if n is not None:
             text = f"Extracted {n} {'page' if n == 1 else 'pages'}"

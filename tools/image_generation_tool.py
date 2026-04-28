@@ -160,7 +160,7 @@ FAL_MODELS: Dict[str, Dict[str, Any]] = {
         "supports": {
             "prompt", "aspect_ratio", "num_images", "output_format",
             "safety_tolerance", "seed", "sync_mode", "resolution",
-            "enable_web_search", "limit_generations",
+            "limit_generations",
         },
         "upscale": False,
     },

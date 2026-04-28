@@ -495,7 +495,7 @@ class TestPreToolCallBlocking:
             "hermes_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
-        assert get_pre_tool_call_block_message("web_search", {"q": "test"}) is None
+        assert get_pre_tool_call_block_message("web_extract", {"q": "test"}) is None
 
     def test_first_valid_block_wins(self, monkeypatch):
         monkeypatch.setattr(
@@ -1023,7 +1023,7 @@ class TestPluginDispatchTool:
         with patch("hermes_cli.plugins.PluginContext.dispatch_tool.__module__", "hermes_cli.plugins"):
             with patch.dict("sys.modules", {}):
                 with patch("tools.registry.registry", mock_registry):
-                    result = ctx.dispatch_tool("web_search", {"query": "test"})
+                    result = ctx.dispatch_tool("web_extract", {"query": "test"})
 
         assert result == '{"result": "ok"}'
 

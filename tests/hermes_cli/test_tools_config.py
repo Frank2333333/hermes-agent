@@ -101,7 +101,7 @@ def test_get_platform_tools_includes_enabled_mcp_servers_by_default():
     config = {
         "mcp_servers": {
             "exa": {"url": "https://mcp.exa.ai/mcp"},
-            "web-search-prime": {"url": "https://api.z.ai/api/mcp/web_search_prime/mcp"},
+            "web-search-prime": {"url": "https://api.z.ai/api/mcp/web_extract_prime/mcp"},
             "disabled-server": {"url": "https://example.com/mcp", "enabled": False},
         }
     }
@@ -118,7 +118,7 @@ def test_get_platform_tools_keeps_enabled_mcp_servers_with_explicit_builtin_sele
         "platform_toolsets": {"cli": ["web", "memory"]},
         "mcp_servers": {
             "exa": {"url": "https://mcp.exa.ai/mcp"},
-            "web-search-prime": {"url": "https://api.z.ai/api/mcp/web_search_prime/mcp"},
+            "web-search-prime": {"url": "https://api.z.ai/api/mcp/web_extract_prime/mcp"},
         },
     }
 
@@ -136,7 +136,7 @@ def test_get_platform_tools_no_mcp_sentinel_excludes_all_mcp_servers():
         "platform_toolsets": {"cli": ["web", "terminal", "no_mcp"]},
         "mcp_servers": {
             "exa": {"url": "https://mcp.exa.ai/mcp"},
-            "web-search-prime": {"url": "https://api.z.ai/api/mcp/web_search_prime/mcp"},
+            "web-search-prime": {"url": "https://api.z.ai/api/mcp/web_extract_prime/mcp"},
         },
     }
 

@@ -1180,7 +1180,7 @@ Environment scrubbing (strips `*_API_KEY`, `*_TOKEN`, `*_SECRET`, `*_PASSWORD`, 
 
 ## Web Search Backends
 
-The `web_search`, `web_extract`, and `web_crawl` tools support four backend providers. Configure the backend in `config.yaml` or via `hermes tools`:
+The `web_extract`, `web_extract`, and `web_crawl` tools support four backend providers. Configure the backend in `config.yaml` or via `hermes tools`:
 
 ```yaml
 web:
@@ -1279,7 +1279,7 @@ security:
       - "/etc/hermes/blocked-sites.txt"
 ```
 
-When enabled, any URL matching a blocked domain pattern is rejected before the web or browser tool executes. This applies to `web_search`, `web_extract`, `browser_navigate`, and any tool that accesses URLs.
+When enabled, any URL matching a blocked domain pattern is rejected before the web or browser tool executes. This applies to `web_extract`, `web_extract`, `browser_navigate`, and any tool that accesses URLs.
 
 Domain rules support:
 - Exact domains: `admin.example.com`

@@ -48,7 +48,7 @@ from hermes_cli.cli_output import (  # noqa: E402 — late import block
 # Each entry: (toolset_name, label, description)
 # These map to keys in toolsets.py TOOLSETS dict.
 CONFIGURABLE_TOOLSETS = [
-    ("web",             "🔍 Web Search & Scraping",    "web_search, web_extract"),
+    ("web",             "🔍 Web Extraction",    "web_extract"),
     ("browser",         "🌐 Browser Automation",       "navigate, click, type, scroll"),
     ("terminal",        "💻 Terminal & Processes",      "terminal, process"),
     ("file",            "📁 File Operations",           "read, write, patch, search"),
@@ -64,7 +64,7 @@ CONFIGURABLE_TOOLSETS = [
     ("clarify",         "❓ Clarifying Questions",      "clarify"),
     ("delegation",      "👥 Task Delegation",           "delegate_task"),
     ("cronjob",         "⏰ Cron Jobs",                 "create/list/update/pause/resume/run, with optional attached skills"),
-    ("messaging",       "📨 Cross-Platform Messaging",  "send_message"),
+    ("messaging",       "📨 Cross-Platform Messaging",  "disabled"),
     ("rl",              "🧪 RL Training",               "Tinker-Atropos training tools"),
     ("homeassistant",    "🏠 Home Assistant",           "smart home device control"),
 ]

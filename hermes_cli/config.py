@@ -1309,26 +1309,26 @@ OPTIONAL_ENV_VARS = {
 
     # ── Tool API keys ──
     "EXA_API_KEY": {
-        "description": "Exa API key for AI-native web search and contents",
+        "description": "Exa API key (legacy web search backend; unused in enterprise build)",
         "prompt": "Exa API key",
         "url": "https://exa.ai/",
-        "tools": ["web_search", "web_extract"],
+        "tools": ["web_extract"],
         "password": True,
         "category": "tool",
     },
     "PARALLEL_API_KEY": {
-        "description": "Parallel API key for AI-native web search and extract",
+        "description": "Parallel API key (legacy search/extract backend; unused in enterprise build)",
         "prompt": "Parallel API key",
         "url": "https://parallel.ai/",
-        "tools": ["web_search", "web_extract"],
+        "tools": ["web_extract"],
         "password": True,
         "category": "tool",
     },
     "FIRECRAWL_API_KEY": {
-        "description": "Firecrawl API key for web search and scraping",
+        "description": "Firecrawl API key for web extraction and scraping",
         "prompt": "Firecrawl API key",
         "url": "https://firecrawl.dev/",
-        "tools": ["web_search", "web_extract"],
+        "tools": ["web_extract"],
         "password": True,
         "category": "tool",
     },
@@ -1373,10 +1373,10 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "TAVILY_API_KEY": {
-        "description": "Tavily API key for AI-native web search, extract, and crawl",
+        "description": "Tavily API key (legacy extract/crawl backend; unused in enterprise build)",
         "prompt": "Tavily API key",
         "url": "https://app.tavily.com/home",
-        "tools": ["web_search", "web_extract", "web_crawl"],
+        "tools": ["web_extract", "web_crawl"],
         "password": True,
         "category": "tool",
     },
@@ -1782,27 +1782,6 @@ OPTIONAL_ENV_VARS = {
         "password": True,
         "category": "messaging",
         "advanced": True,
-    },
-    "WEBHOOK_ENABLED": {
-        "description": "Enable the webhook platform adapter for receiving events from GitHub, GitLab, etc.",
-        "prompt": "Enable webhooks (true/false)",
-        "url": None,
-        "password": False,
-        "category": "messaging",
-    },
-    "WEBHOOK_PORT": {
-        "description": "Port for the webhook HTTP server (default: 8644).",
-        "prompt": "Webhook port",
-        "url": None,
-        "password": False,
-        "category": "messaging",
-    },
-    "WEBHOOK_SECRET": {
-        "description": "Global HMAC secret for webhook signature validation (overridable per route in config.yaml).",
-        "prompt": "Webhook secret",
-        "url": None,
-        "password": True,
-        "category": "messaging",
     },
 
     # ── Agent settings ──

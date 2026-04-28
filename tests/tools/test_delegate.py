@@ -316,7 +316,7 @@ class TestToolNamePreservation(unittest.TestCase):
         import model_tools
 
         parent = _make_mock_parent(depth=0)
-        original_tools = ["terminal", "read_file", "web_search", "execute_code", "delegate_task"]
+        original_tools = ["terminal", "read_file", "web_extract", "execute_code", "delegate_task"]
         model_tools._last_resolved_tool_names = list(original_tools)
 
         with patch("run_agent.AIAgent") as MockAgent:
@@ -335,7 +335,7 @@ class TestToolNamePreservation(unittest.TestCase):
         import model_tools
 
         parent = _make_mock_parent(depth=0)
-        original_tools = ["terminal", "read_file", "web_search"]
+        original_tools = ["terminal", "read_file", "web_extract"]
         model_tools._last_resolved_tool_names = list(original_tools)
 
         with patch("run_agent.AIAgent") as MockAgent:
@@ -382,7 +382,7 @@ class TestToolNamePreservation(unittest.TestCase):
         import model_tools
 
         parent = _make_mock_parent(depth=0)
-        expected_tools = ["read_file", "web_search", "execute_code"]
+        expected_tools = ["read_file", "web_extract", "execute_code"]
         model_tools._last_resolved_tool_names = list(expected_tools)
 
         captured = {}
@@ -422,7 +422,7 @@ class TestDelegateObservability(unittest.TestCase):
                 "messages": [
                     {"role": "user", "content": "do something"},
                     {"role": "assistant", "tool_calls": [
-                        {"id": "tc_1", "function": {"name": "web_search", "arguments": '{"query": "test"}'}}
+                        {"id": "tc_1", "function": {"name": "web_extract", "arguments": '{"query": "test"}'}}
                     ]},
                     {"role": "tool", "tool_call_id": "tc_1", "content": '{"results": [1,2,3]}'},
                     {"role": "assistant", "content": "done"},
@@ -441,7 +441,7 @@ class TestDelegateObservability(unittest.TestCase):
 
             # Tool trace
             self.assertEqual(len(entry["tool_trace"]), 1)
-            self.assertEqual(entry["tool_trace"][0]["tool"], "web_search")
+            self.assertEqual(entry["tool_trace"][0]["tool"], "web_extract")
             self.assertIn("args_bytes", entry["tool_trace"][0])
             self.assertIn("result_bytes", entry["tool_trace"][0])
             self.assertEqual(entry["tool_trace"][0]["status"], "ok")
@@ -489,8 +489,8 @@ class TestDelegateObservability(unittest.TestCase):
                 "api_calls": 1,
                 "messages": [
                     {"role": "assistant", "tool_calls": [
-                        {"id": "tc_a", "function": {"name": "web_search", "arguments": '{"q": "a"}'}},
-                        {"id": "tc_b", "function": {"name": "web_search", "arguments": '{"q": "b"}'}},
+                        {"id": "tc_a", "function": {"name": "web_extract", "arguments": '{"q": "a"}'}},
+                        {"id": "tc_b", "function": {"name": "web_extract", "arguments": '{"q": "b"}'}},
                         {"id": "tc_c", "function": {"name": "terminal", "arguments": '{"cmd": "ls"}'}},
                     ]},
                     {"role": "tool", "tool_call_id": "tc_a", "content": '{"ok": true}'},
@@ -507,13 +507,13 @@ class TestDelegateObservability(unittest.TestCase):
             # All three tool calls should have results
             self.assertEqual(len(trace), 3)
 
-            # First: web_search → ok
-            self.assertEqual(trace[0]["tool"], "web_search")
+            # First: web_extract → ok
+            self.assertEqual(trace[0]["tool"], "web_extract")
             self.assertEqual(trace[0]["status"], "ok")
             self.assertIn("result_bytes", trace[0])
 
-            # Second: web_search → error
-            self.assertEqual(trace[1]["tool"], "web_search")
+            # Second: web_extract → error
+            self.assertEqual(trace[1]["tool"], "web_extract")
             self.assertEqual(trace[1]["status"], "error")
             self.assertIn("result_bytes", trace[1])
 
@@ -1200,10 +1200,10 @@ class TestDelegateHeartbeat(unittest.TestCase):
 
         child = MagicMock()
         child.get_activity_summary.return_value = {
-            "current_tool": "web_search",
+            "current_tool": "web_extract",
             "api_call_count": 2,
             "max_iterations": 50,
-            "last_activity_desc": "executing tool: web_search",
+            "last_activity_desc": "executing tool: web_extract",
         }
 
         def slow_fail(**kwargs):

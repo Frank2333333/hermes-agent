@@ -1,4 +1,4 @@
-"""Tests for agent/prompt_builder.py â€” context scanning, truncation, skills index."""
+"""Tests for agent/prompt_builder.py â€?context scanning, truncation, skills index."""
 
 import builtins
 import importlib
@@ -141,7 +141,7 @@ class TestTruncateContent:
 
 
 # =========================================================================
-# _parse_skill_file â€” single-pass skill file reading
+# _parse_skill_file â€?single-pass skill file reading
 # =========================================================================
 
 
@@ -448,7 +448,7 @@ class TestBuildNousSubscriptionPrompt:
             ),
         )
 
-        prompt = build_nous_subscription_prompt({"web_search", "browser_navigate"})
+        prompt = build_nous_subscription_prompt({"web_extract", "browser_navigate"})
 
         assert "Browser Use" in prompt
         assert "Modal execution is optional" in prompt
@@ -480,7 +480,7 @@ class TestBuildNousSubscriptionPrompt:
     def test_feature_flag_off_returns_empty_prompt(self, monkeypatch):
         monkeypatch.setattr("tools.tool_backend_helpers.managed_nous_tools_enabled", lambda: False)
 
-        prompt = build_nous_subscription_prompt({"web_search"})
+        prompt = build_nous_subscription_prompt({"web_extract"})
 
         assert prompt == ""
 
@@ -555,7 +555,7 @@ class TestBuildContextFilesPrompt:
         assert "ESLint" in result
 
     def test_agents_md_top_level_only(self, tmp_path):
-        """AGENTS.md is loaded from cwd only â€” subdirectory copies are ignored."""
+        """AGENTS.md is loaded from cwd only â€?subdirectory copies are ignored."""
         (tmp_path / "AGENTS.md").write_text("Top level instructions.")
         sub = tmp_path / "src"
         sub.mkdir()
@@ -843,7 +843,7 @@ class TestSkillShouldShow:
         assert _skill_should_show(
             {"fallback_for_toolsets": [], "requires_toolsets": [],
              "fallback_for_tools": [], "requires_tools": []},
-            {"web_search"}, {"web"}
+            {"web_extract"}, {"web"}
         ) is True
 
     def test_fallback_hidden_when_toolset_available(self):
@@ -868,12 +868,12 @@ class TestSkillShouldShow:
 
     def test_fallback_for_tools_hidden_when_tool_available(self):
         conditions = {"fallback_for_toolsets": [], "requires_toolsets": [],
-                      "fallback_for_tools": ["web_search"], "requires_tools": []}
-        assert _skill_should_show(conditions, {"web_search"}, set()) is False
+                      "fallback_for_tools": ["web_extract"], "requires_tools": []}
+        assert _skill_should_show(conditions, {"web_extract"}, set()) is False
 
     def test_fallback_for_tools_shown_when_tool_missing(self):
         conditions = {"fallback_for_toolsets": [], "requires_toolsets": [],
-                      "fallback_for_tools": ["web_search"], "requires_tools": []}
+                      "fallback_for_tools": ["web_extract"], "requires_tools": []}
         assert _skill_should_show(conditions, set(), set()) is True
 
     def test_requires_tools_hidden_when_tool_missing(self):

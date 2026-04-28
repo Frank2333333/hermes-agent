@@ -12,9 +12,9 @@ Toolsets are named bundles of tools that control what the agent can do. They're 
 
 Every tool belongs to exactly one toolset. When you enable a toolset, all tools in that bundle become available to the agent. Toolsets come in three kinds:
 
-- **Core** â€” A single logical group of related tools (e.g., `file` bundles `read_file`, `write_file`, `patch`, `search_files`)
-- **Composite** â€” Combines multiple core toolsets for a common scenario (e.g., `debugging` bundles file, terminal, and web tools)
-- **Platform** â€” A complete tool configuration for a specific deployment context (e.g., `hermes-cli` is the default for interactive CLI sessions)
+- **Core** â€?A single logical group of related tools (e.g., `file` bundles `read_file`, `write_file`, `patch`, `search_files`)
+- **Composite** â€?Combines multiple core toolsets for a common scenario (e.g., `debugging` bundles file, terminal, and web tools)
+- **Platform** â€?A complete tool configuration for a specific deployment context (e.g., `hermes-cli` is the default for interactive CLI sessions)
 
 ## Configuring Toolsets
 
@@ -22,7 +22,7 @@ Every tool belongs to exactly one toolset. When you enable a toolset, all tools 
 
 ```bash
 hermes chat --toolsets web,file,terminal
-hermes chat --toolsets debugging        # composite â€” expands to file + terminal + web
+hermes chat --toolsets debugging        # composite â€?expands to file + terminal + web
 hermes chat --toolsets all              # everything
 ```
 
@@ -52,7 +52,7 @@ Or in-session:
 
 | Toolset | Tools | Purpose |
 |---------|-------|---------|
-| `browser` | `browser_back`, `browser_cdp`, `browser_click`, `browser_console`, `browser_get_images`, `browser_navigate`, `browser_press`, `browser_scroll`, `browser_snapshot`, `browser_type`, `browser_vision`, `web_search` | Full browser automation. Includes `web_search` as a fallback for quick lookups. `browser_cdp` is a raw CDP passthrough gated on a reachable CDP endpoint â€” it only appears when `/browser connect` is active or `browser.cdp_url` is set. |
+| `browser` | `browser_back`, `browser_cdp`, `browser_click`, `browser_console`, `browser_get_images`, `browser_navigate`, `browser_press`, `browser_scroll`, `browser_snapshot`, `browser_type`, `browser_vision`, `web_extract` | Full browser automation. Includes `web_extract` as a fallback for quick lookups. `browser_cdp` is a raw CDP passthrough gated on a reachable CDP endpoint â€?it only appears when `/browser connect` is active or `browser.cdp_url` is set. |
 | `clarify` | `clarify` | Ask the user a question when the agent needs clarification. |
 | `code_execution` | `execute_code` | Run Python scripts that call Hermes tools programmatically. |
 | `cronjob` | `cronjob` | Schedule and manage recurring tasks. |
@@ -66,14 +66,14 @@ Or in-session:
 | `messaging` | `send_message` | Send messages to other platforms (Telegram, Discord, etc.) from within a session. |
 | `moa` | `mixture_of_agents` | Multi-model consensus via Mixture of Agents. |
 | `rl` | `rl_check_status`, `rl_edit_config`, `rl_get_current_config`, `rl_get_results`, `rl_list_environments`, `rl_list_runs`, `rl_select_environment`, `rl_start_training`, `rl_stop_training`, `rl_test_inference` | RL training environment management (Atropos). |
-| `search` | `web_search` | Web search only (without extract). |
+| `search` | none | Disabled in the enterprise build. |
 | `session_search` | `session_search` | Search past conversation sessions. |
 | `skills` | `skill_manage`, `skill_view`, `skills_list` | Skill CRUD and browsing. |
 | `terminal` | `process`, `terminal` | Shell command execution and background process management. |
 | `todo` | `todo` | Task list management within a session. |
 | `tts` | `text_to_speech` | Text-to-speech audio generation. |
 | `vision` | `vision_analyze` | Image analysis via vision-capable models. |
-| `web` | `web_extract`, `web_search` | Web search and page content extraction. |
+| `web` | `web_extract` | Page content extraction from approved URLs. |
 
 ## Composite Toolsets
 
@@ -81,8 +81,8 @@ These expand to multiple core toolsets, providing a convenient shorthand for com
 
 | Toolset | Expands to | Use case |
 |---------|-----------|----------|
-| `debugging` | `web` + `file` + `process`, `terminal` (via `includes`) â€” effectively `patch`, `process`, `read_file`, `search_files`, `terminal`, `web_extract`, `web_search`, `write_file` | Debug sessions â€” file access, terminal, and web research without browser or delegation overhead. |
-| `safe` | `image_generate`, `vision_analyze`, `web_extract`, `web_search` | Read-only research and media generation. No file writes, no terminal access, no code execution. Good for untrusted or constrained environments. |
+| `debugging` | `web` + `file` + `process`, `terminal` (via `includes`) â€?effectively `patch`, `process`, `read_file`, `search_files`, `terminal`, `web_extract`, `web_extract`, `write_file` | Debug sessions â€?file access, terminal, and web research without browser or delegation overhead. |
+| `safe` | `image_generate`, `vision_analyze`, `web_extract` | Read-only research and media generation. No file writes, no terminal access, no code execution. Good for untrusted or constrained environments. |
 
 ## Platform Toolsets
 
@@ -90,9 +90,9 @@ Platform toolsets define the complete tool configuration for a deployment target
 
 | Toolset | Differences from `hermes-cli` |
 |---------|-------------------------------|
-| `hermes-cli` | Full toolset â€” all 36 core tools including `clarify`. The default for interactive CLI sessions. |
+| `hermes-cli` | Full toolset â€?all 36 core tools including `clarify`. The default for interactive CLI sessions. |
 | `hermes-acp` | Drops `clarify`, `cronjob`, `image_generate`, `send_message`, `text_to_speech`, homeassistant tools. Focused on coding tasks in IDE context. |
-| `hermes-api-server` | Drops `clarify`, `send_message`, and `text_to_speech`. Adds everything else â€” suitable for programmatic access where user interaction isn't possible. |
+| `hermes-api-server` | Drops `clarify`, `send_message`, and `text_to_speech`. Adds everything else â€?suitable for programmatic access where user interaction isn't possible. |
 | `hermes-telegram` | Same as `hermes-cli`. |
 | `hermes-discord` | Same as `hermes-cli`. |
 | `hermes-slack` | Same as `hermes-cli`. |
@@ -111,7 +111,7 @@ Platform toolsets define the complete tool configuration for a deployment target
 | `hermes-weixin` | Same as `hermes-cli`. |
 | `hermes-homeassistant` | Same as `hermes-cli` plus the `homeassistant` toolset always on. |
 | `hermes-webhook` | Same as `hermes-cli`. |
-| `hermes-gateway` | Internal gateway orchestrator toolset â€” union of the broadest possible tool set when the gateway needs to accept any message source. |
+| `hermes-gateway` | Internal gateway orchestrator toolset â€?union of the broadest possible tool set when the gateway needs to accept any message source. |
 
 ## Dynamic Toolsets
 
@@ -151,7 +151,7 @@ custom_toolsets:
 
 ### Wildcards
 
-- `all` or `*` â€” expands to every registered toolset (built-in + dynamic + plugin)
+- `all` or `*` â€?expands to every registered toolset (built-in + dynamic + plugin)
 
 ## Relationship to `hermes tools`
 

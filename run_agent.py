@@ -259,7 +259,6 @@ _PARALLEL_SAFE_TOOLS = frozenset({
     "skills_list",
     "vision_analyze",
     "web_extract",
-    "web_search",
 })
 
 # File tools can run concurrently when they target independent paths.
@@ -7783,8 +7782,7 @@ class AIAgent:
 
                     # Check for interrupt — the per-thread interrupt signal
                     # already causes individual tools (terminal, execute_code)
-                    # to abort, but tools without interrupt checks (web_search,
-                    # read_file) will run to completion.  Cancel any futures
+                    # to abort, but tools without interrupt checks (read_file)`r`n                    # will run to completion. Cancel any futures
                     # that haven't started yet so we don't block on them.
                     if self._interrupt_requested:
                         if not _interrupt_logged:

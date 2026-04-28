@@ -151,11 +151,11 @@ class TestToolProgressScrollback:
         cli = _make_cli(tool_progress="all")
         with patch.object(_cli_mod, "_cprint") as mock_print:
             # All start first (concurrent pattern)
-            cli._on_tool_progress("tool.started", "web_search", "query 1", {"query": "test 1"})
-            cli._on_tool_progress("tool.started", "web_search", "query 2", {"query": "test 2"})
+            cli._on_tool_progress("tool.started", "web_extract", "query 1", {"query": "test 1"})
+            cli._on_tool_progress("tool.started", "web_extract", "query 2", {"query": "test 2"})
             # All complete
-            cli._on_tool_progress("tool.completed", "web_search", None, None, duration=1.0, is_error=False)
-            cli._on_tool_progress("tool.completed", "web_search", None, None, duration=1.5, is_error=False)
+            cli._on_tool_progress("tool.completed", "web_extract", None, None, duration=1.0, is_error=False)
+            cli._on_tool_progress("tool.completed", "web_extract", None, None, duration=1.5, is_error=False)
 
         assert mock_print.call_count == 2
 

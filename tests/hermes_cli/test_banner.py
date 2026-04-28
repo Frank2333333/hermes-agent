@@ -52,11 +52,11 @@ def test_build_welcome_banner_uses_normalized_toolset_names():
             model="anthropic/test-model",
             cwd="/tmp/project",
             tools=[
-                {"function": {"name": "web_search"}},
+                {"function": {"name": "web_extract"}},
                 {"function": {"name": "read_file"}},
             ],
             get_toolset_for_tool=lambda name: {
-                "web_search": "web_tools",
+                "web_extract": "web_tools",
                 "read_file": "file",
             }.get(name),
         )

@@ -8,7 +8,6 @@ When available, Hermes can route Firecrawl calls through a Nous-hosted tool-gate
 for Nous Subscribers only.
 
 Available tools:
-- web_search_tool: Search the web for information
 - web_extract_tool: Extract content from specific web pages
 - web_crawl_tool: Crawl websites with specific instructions
 
@@ -28,10 +27,9 @@ Debug Mode:
 - Captures all tool calls, results, and compression metrics
 
 Usage:
-    from web_tools import web_search_tool, web_extract_tool, web_crawl_tool
+    from web_tools import web_extract_tool, web_crawl_tool
     
     # Search the web
-    results = web_search_tool("Python machine learning libraries", limit=3)
     
     # Extract content from URLs  
     content = web_extract_tool(["https://example.com"], format="markdown")
@@ -114,7 +112,7 @@ def _ensure_enterprise_web_backend_allowed(backend: str) -> None:
     if backend != "firecrawl":
         raise ValueError(
             "Only self-hosted Firecrawl is allowed for web extraction/crawl in the enterprise build. "
-            "web_search and public web backends are disabled."
+            "Public web search backends are disabled."
         )
     direct_config = _get_direct_firecrawl_config()
     if direct_config is None:
@@ -328,23 +326,6 @@ def _tavily_request(endpoint: str, payload: dict) -> dict:
     return response.json()
 
 
-def _normalize_tavily_search_results(response: dict) -> dict:
-    """Normalize Tavily /search response to the standard web search format.
-
-    Tavily returns ``{results: [{title, url, content, score, ...}]}``.
-    We map to ``{success, data: {web: [{title, url, description, position}]}}``.
-    """
-    web_results = []
-    for i, result in enumerate(response.get("results", [])):
-        web_results.append({
-            "title": result.get("title", ""),
-            "url": result.get("url", ""),
-            "description": result.get("content", ""),
-            "position": i + 1,
-        })
-    return {"success": True, "data": {"web": web_results}}
-
-
 def _normalize_tavily_documents(response: dict, fallback_url: str = "") -> List[Dict[str, Any]]:
     """Normalize Tavily /extract or /crawl response to the standard document format.
 
@@ -421,35 +402,6 @@ def _normalize_result_list(values: Any) -> List[Dict[str, Any]]:
     return normalized
 
 
-def _extract_web_search_results(response: Any) -> List[Dict[str, Any]]:
-    """Extract Firecrawl search results across SDK/direct/gateway response shapes."""
-    response_plain = _to_plain_object(response)
-
-    if isinstance(response_plain, dict):
-        data = response_plain.get("data")
-        if isinstance(data, list):
-            return _normalize_result_list(data)
-
-        if isinstance(data, dict):
-            data_web = _normalize_result_list(data.get("web"))
-            if data_web:
-                return data_web
-            data_results = _normalize_result_list(data.get("results"))
-            if data_results:
-                return data_results
-
-        top_web = _normalize_result_list(response_plain.get("web"))
-        if top_web:
-            return top_web
-
-        top_results = _normalize_result_list(response_plain.get("results"))
-        if top_results:
-            return top_results
-
-    if hasattr(response, "web"):
-        return _normalize_result_list(getattr(response, "web", []))
-
-    return []
 
 
 def _extract_scrape_payload(scrape_result: Any) -> Dict[str, Any]:
@@ -919,34 +871,6 @@ def _get_exa_client():
 
 # ─── Exa Search & Extract Helpers ─────────────────────────────────────────────
 
-def _exa_search(query: str, limit: int = 10) -> dict:
-    """Search using the Exa SDK and return results as a dict."""
-    from tools.interrupt import is_interrupted
-    if is_interrupted():
-        return {"error": "Interrupted", "success": False}
-
-    logger.info("Exa search: '%s' (limit=%d)", query, limit)
-    response = _get_exa_client().search(
-        query,
-        num_results=limit,
-        contents={
-            "highlights": True,
-        },
-    )
-
-    web_results = []
-    for i, result in enumerate(response.results or []):
-        highlights = result.highlights or []
-        web_results.append({
-            "url": result.url or "",
-            "title": result.title or "",
-            "description": " ".join(highlights) if highlights else "",
-            "position": i + 1,
-        })
-
-    return {"success": True, "data": {"web": web_results}}
-
-
 def _exa_extract(urls: List[str]) -> List[Dict[str, Any]]:
     """Extract content from URLs using the Exa SDK.
 
@@ -980,37 +904,6 @@ def _exa_extract(urls: List[str]) -> List[Dict[str, Any]]:
 
 
 # ─── Parallel Search & Extract Helpers ────────────────────────────────────────
-
-def _parallel_search(query: str, limit: int = 5) -> dict:
-    """Search using the Parallel SDK and return results as a dict."""
-    from tools.interrupt import is_interrupted
-    if is_interrupted():
-        return {"error": "Interrupted", "success": False}
-
-    mode = os.getenv("PARALLEL_SEARCH_MODE", "agentic").lower().strip()
-    if mode not in ("fast", "one-shot", "agentic"):
-        mode = "agentic"
-
-    logger.info("Parallel search: '%s' (mode=%s, limit=%d)", query, mode, limit)
-    response = _get_parallel_client().beta.search(
-        search_queries=[query],
-        objective=query,
-        mode=mode,
-        max_results=min(limit, 20),
-    )
-
-    web_results = []
-    for i, result in enumerate(response.results or []):
-        excerpts = result.excerpts or []
-        web_results.append({
-            "url": result.url or "",
-            "title": result.title or "",
-            "description": " ".join(excerpts) if excerpts else "",
-            "position": i + 1,
-        })
-
-    return {"success": True, "data": {"web": web_results}}
-
 
 async def _parallel_extract(urls: List[str]) -> List[Dict[str, Any]]:
     """Extract content from URLs using the Parallel async SDK.
@@ -1053,143 +946,6 @@ async def _parallel_extract(urls: List[str]) -> List[Dict[str, Any]]:
         })
 
     return results
-
-
-def web_search_tool(query: str, limit: int = 5) -> str:
-    """
-    Search the web for information using available search API backend.
-
-    This function provides a generic interface for web search that can work
-    with multiple backends (Parallel or Firecrawl).
-
-    Note: This function returns search result metadata only (URLs, titles, descriptions).
-    Use web_extract_tool to get full content from specific URLs.
-    
-    Args:
-        query (str): The search query to look up
-        limit (int): Maximum number of results to return (default: 5)
-    
-    Returns:
-        str: JSON string containing search results with the following structure:
-             {
-                 "success": bool,
-                 "data": {
-                     "web": [
-                         {
-                             "title": str,
-                             "url": str,
-                             "description": str,
-                             "position": int
-                         },
-                         ...
-                     ]
-                 }
-             }
-    
-    Raises:
-        Exception: If search fails or API key is not set
-    """
-    debug_call_data = {
-        "parameters": {
-            "query": query,
-            "limit": limit
-        },
-        "error": None,
-        "results_count": 0,
-        "original_response_size": 0,
-        "final_response_size": 0
-    }
-    
-    try:
-        if is_enterprise_enabled():
-            return tool_error(
-                "web_search is disabled in the enterprise build. "
-                "Use web_extract or browser tools against approved intranet URLs instead."
-            )
-
-        from tools.interrupt import is_interrupted
-        if is_interrupted():
-            return tool_error("Interrupted", success=False)
-
-        # Dispatch to the configured backend
-        backend = _get_backend()
-        _ensure_enterprise_web_backend_allowed(backend)
-        if backend == "parallel":
-            response_data = _parallel_search(query, limit)
-            debug_call_data["results_count"] = len(response_data.get("data", {}).get("web", []))
-            result_json = json.dumps(response_data, indent=2, ensure_ascii=False)
-            debug_call_data["final_response_size"] = len(result_json)
-            _debug.log_call("web_search_tool", debug_call_data)
-            _debug.save()
-            return result_json
-
-        if backend == "exa":
-            response_data = _exa_search(query, limit)
-            debug_call_data["results_count"] = len(response_data.get("data", {}).get("web", []))
-            result_json = json.dumps(response_data, indent=2, ensure_ascii=False)
-            debug_call_data["final_response_size"] = len(result_json)
-            _debug.log_call("web_search_tool", debug_call_data)
-            _debug.save()
-            return result_json
-
-        if backend == "tavily":
-            logger.info("Tavily search: '%s' (limit: %d)", query, limit)
-            raw = _tavily_request("search", {
-                "query": query,
-                "max_results": min(limit, 20),
-                "include_raw_content": False,
-                "include_images": False,
-            })
-            response_data = _normalize_tavily_search_results(raw)
-            debug_call_data["results_count"] = len(response_data.get("data", {}).get("web", []))
-            result_json = json.dumps(response_data, indent=2, ensure_ascii=False)
-            debug_call_data["final_response_size"] = len(result_json)
-            _debug.log_call("web_search_tool", debug_call_data)
-            _debug.save()
-            return result_json
-
-        logger.info("Searching the web for: '%s' (limit: %d)", query, limit)
-
-        response = _get_firecrawl_client().search(
-            query=query,
-            limit=limit
-        )
-
-        web_results = _extract_web_search_results(response)
-        results_count = len(web_results)
-        logger.info("Found %d search results", results_count)
-        
-        # Build response with just search metadata (URLs, titles, descriptions)
-        response_data = {
-            "success": True,
-            "data": {
-                "web": web_results
-            }
-        }
-        
-        # Capture debug information
-        debug_call_data["results_count"] = results_count
-        
-        # Convert to JSON
-        result_json = json.dumps(response_data, indent=2, ensure_ascii=False)
-        
-        debug_call_data["final_response_size"] = len(result_json)
-        
-        # Log debug information
-        _debug.log_call("web_search_tool", debug_call_data)
-        _debug.save()
-        
-        return result_json
-        
-    except Exception as e:
-        error_msg = f"Error searching web: {str(e)}"
-        logger.debug("%s", error_msg)
-
-        debug_call_data["error"] = error_msg
-        _debug.log_call("web_search_tool", debug_call_data)
-        _debug.save()
-
-        return tool_error(error_msg)
 
 
 async def web_extract_tool(
@@ -1662,7 +1418,7 @@ async def web_crawl_tool(
         if not check_firecrawl_api_key():
             return json.dumps({
                 "error": "web_crawl requires Firecrawl. Set FIRECRAWL_API_KEY, FIRECRAWL_API_URL"
-                         f"{_firecrawl_backend_help_suffix()}, or use web_search + web_extract instead.",
+                         f"{_firecrawl_backend_help_suffix()}, or use web_extract instead.",
                 "success": False,
             }, ensure_ascii=False)
 
@@ -2030,11 +1786,10 @@ if __name__ == "__main__":
         print("🐛 Debug mode disabled (set WEB_TOOLS_DEBUG=true to enable)")
     
     print("\nBasic usage:")
-    print("  from web_tools import web_search_tool, web_extract_tool, web_crawl_tool")
+    print("  from web_tools import web_extract_tool, web_crawl_tool")
     print("  import asyncio")
     print("")
     print("  # Search (synchronous)")
-    print("  results = web_search_tool('Python tutorials')")
     print("")
     print("  # Extract and crawl (asynchronous)")
     print("  async def main():")
@@ -2076,20 +1831,6 @@ if __name__ == "__main__":
 # ---------------------------------------------------------------------------
 from tools.registry import registry, tool_error
 
-WEB_SEARCH_SCHEMA = {
-    "name": "web_search",
-    "description": "Search the web for information on any topic. Returns up to 5 relevant results with titles, URLs, and descriptions.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "query": {
-                "type": "string",
-                "description": "The search query to look up on the web"
-            }
-        },
-        "required": ["query"]
-    }
-}
 
 WEB_EXTRACT_SCHEMA = {
     "name": "web_extract",
@@ -2108,16 +1849,6 @@ WEB_EXTRACT_SCHEMA = {
     }
 }
 
-registry.register(
-    name="web_search",
-    toolset="web",
-    schema=WEB_SEARCH_SCHEMA,
-    handler=lambda args, **kw: web_search_tool(args.get("query", ""), limit=5),
-    check_fn=check_web_api_key,
-    requires_env=_web_requires_env(),
-    emoji="🔍",
-    max_result_size_chars=100_000,
-)
 registry.register(
     name="web_extract",
     toolset="web",

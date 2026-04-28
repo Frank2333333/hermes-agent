@@ -3,7 +3,7 @@ name: jupyter-live-kernel
 description: >
   Use a live Jupyter kernel for stateful, iterative Python execution via hamelnb.
   Load this skill when the task involves exploration, iteration, or inspecting
-  intermediate results â€” data science, ML experimentation, API exploration, or
+  intermediate results â€?data science, ML experimentation, API exploration, or
   building up complex code step-by-step. Uses terminal to run CLI commands against
   a live Jupyter kernel. No new tools required.
 version: 1.0.0
@@ -26,7 +26,7 @@ state incrementally, explore APIs, inspect DataFrames, or iterate on complex cod
 | Tool | Use When |
 |------|----------|
 | **This skill** | Iterative exploration, state across steps, data science, ML, "let me try this and check" |
-| `execute_code` | One-shot scripts needing hermes tool access (web_search, file ops). Stateless. |
+| `execute_code` | One-shot scripts needing hermes tool access (web_extract, file ops). Stateless. |
 | `terminal` | Shell commands, builds, installs, git, process management |
 
 **Rule of thumb:** If you'd want a Jupyter notebook for the task, use this skill.
@@ -139,29 +139,29 @@ uv run "$SCRIPT" restart-run-all --path <notebook.ipynb> --save-outputs --compac
 
 ## Practical Tips from Experience
 
-1. **First execution after server start may timeout** â€” the kernel needs a moment
+1. **First execution after server start may timeout** â€?the kernel needs a moment
    to initialize. If you get a timeout, just retry.
 
-2. **The kernel Python is JupyterLab's Python** â€” packages must be installed in
+2. **The kernel Python is JupyterLab's Python** â€?packages must be installed in
    that environment. If you need additional packages, install them into the
    JupyterLab tool environment first.
 
-3. **--compact flag saves significant tokens** â€” always use it. JSON output can
+3. **--compact flag saves significant tokens** â€?always use it. JSON output can
    be very verbose without it.
 
 4. **For pure REPL use**, create a scratch.ipynb and don't bother with cell editing.
    Just use `execute` repeatedly.
 
-5. **Argument order matters** â€” subcommand flags like `--path` go BEFORE the
+5. **Argument order matters** â€?subcommand flags like `--path` go BEFORE the
    sub-subcommand. E.g.: `variables --path nb.ipynb list` not `variables list --path nb.ipynb`.
 
 6. **If a session doesn't exist yet**, you need to start one via the REST API
    (see Setup section). The tool can't execute without a live kernel session.
 
-7. **Errors are returned as JSON** with traceback â€” read the `ename` and `evalue`
+7. **Errors are returned as JSON** with traceback â€?read the `ename` and `evalue`
    fields to understand what went wrong.
 
-8. **Occasional websocket timeouts** â€” some operations may timeout on first try,
+8. **Occasional websocket timeouts** â€?some operations may timeout on first try,
    especially after a kernel restart. Retry once before escalating.
 
 ## Timeout Defaults

@@ -116,7 +116,7 @@ metadata:
   hermes:
     fallback_for_toolsets: [web]      # Show ONLY when these toolsets are unavailable
     requires_toolsets: [terminal]     # Show ONLY when these toolsets are available
-    fallback_for_tools: [web_search]  # Show ONLY when these specific tools are unavailable
+    fallback_for_tools: [web_extract]  # Show ONLY when these specific tools are unavailable
     requires_tools: [terminal]        # Show ONLY when these specific tools are available
 ```
 
@@ -127,7 +127,7 @@ metadata:
 | `requires_toolsets` | Skill is **hidden** when the listed toolsets are unavailable. Shown when they're present. |
 | `requires_tools` | Same, but checks individual tools. |
 
-**Example:** The built-in `duckduckgo-search` skill uses `fallback_for_toolsets: [web]`. When you have `FIRECRAWL_API_KEY` set, the web toolset is available and the agent uses `web_search` — the DuckDuckGo skill stays hidden. If the API key is missing, the web toolset is unavailable and the DuckDuckGo skill automatically appears as a fallback.
+**Example:** The built-in `duckduckgo-search` skill uses `fallback_for_toolsets: [web]`. When you have `FIRECRAWL_API_KEY` set, the web toolset is available and the agent uses `web_extract` — the DuckDuckGo skill stays hidden. If the API key is missing, the web toolset is unavailable and the DuckDuckGo skill automatically appears as a fallback.
 
 Skills without any conditional fields behave exactly as before — they're always shown.
 

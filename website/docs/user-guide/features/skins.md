@@ -175,7 +175,7 @@ tool_prefix: "┊"
 # Per-tool emoji overrides (optional)
 tool_emojis:
   terminal: "⚔"
-  web_search: "🔮"
+  web_extract: "🔮"
   read_file: "📄"
 
 # Custom ASCII art banners (optional, Rich markup supported)

@@ -903,7 +903,7 @@ class TestOnMemoryWriteBridge:
         # (as if it was registered via ctx.register_tool → get_tool_definitions)
         existing_tools = [
             {"type": "function", "function": {"name": "ext_recall", "description": "Recall (from registry)", "parameters": {}}},
-            {"type": "function", "function": {"name": "web_search", "description": "Search", "parameters": {}}},
+            {"type": "function", "function": {"name": "web_extract", "description": "Search", "parameters": {}}},
         ]
 
         # Apply the same dedup logic from run_agent.py __init__
@@ -924,8 +924,8 @@ class TestOnMemoryWriteBridge:
         tool_names = [t["function"]["name"] for t in existing_tools]
         assert tool_names.count("ext_recall") == 1, f"ext_recall duplicated: {tool_names}"
         assert tool_names.count("ext_remember") == 1
-        assert tool_names.count("web_search") == 1
-        assert len(existing_tools) == 3  # web_search + ext_recall + ext_remember
+        assert tool_names.count("web_extract") == 1
+        assert len(existing_tools) == 3  # web_extract + ext_recall + ext_remember
 
     def test_on_memory_write_tolerates_provider_failure(self):
         """If a provider's on_memory_write raises, others still get notified."""

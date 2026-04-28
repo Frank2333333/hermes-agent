@@ -713,7 +713,7 @@ class TestChatCompletionsEndpoint:
                 tp_cb = kwargs.get("tool_progress_callback")
                 if tp_cb:
                     tp_cb("tool.started", "_thinking", "some internal state", {})
-                    tp_cb("tool.started", "web_search", "Python docs", {"query": "Python docs"})
+                    tp_cb("tool.started", "web_extract", "Python docs", {"query": "Python docs"})
                 if cb:
                     await asyncio.sleep(0.05)
                     cb("Found it.")
@@ -737,7 +737,7 @@ class TestChatCompletionsEndpoint:
                 assert "some internal state" not in body
                 # Real tool progress should appear as custom SSE event
                 assert "event: hermes.tool.progress" in body
-                assert '"tool": "web_search"' in body
+                assert '"tool": "web_extract"' in body
                 assert '"label": "Python docs"' in body
 
     @pytest.mark.asyncio

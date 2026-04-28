@@ -49,7 +49,7 @@ def agent():
     """Minimal AIAgent with mocked OpenAI client and tool loading."""
     with (
         patch(
-            "run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")
+            "run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")
         ),
         patch("run_agent.check_toolset_requirements", return_value={}),
         patch("run_agent.OpenAI"),
@@ -71,7 +71,7 @@ def agent_with_memory_tool():
     with (
         patch(
             "run_agent.get_tool_definitions",
-            return_value=_make_tool_defs("web_search", "memory"),
+            return_value=_make_tool_defs("web_extract", "memory"),
         ),
         patch("run_agent.check_toolset_requirements", return_value={}),
         patch("run_agent.OpenAI"),
@@ -108,7 +108,7 @@ def test_aiagent_reuses_existing_errors_log_handler():
         with (
             patch(
                 "run_agent.get_tool_definitions",
-                return_value=_make_tool_defs("web_search"),
+                return_value=_make_tool_defs("web_extract"),
             ),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("run_agent.OpenAI"),
@@ -147,7 +147,7 @@ class TestProviderModelNormalization:
     def test_aiagent_strips_matching_native_provider_prefix(self):
         with (
             patch(
-                "run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")
+                "run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")
             ),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("run_agent.OpenAI"),
@@ -167,7 +167,7 @@ class TestProviderModelNormalization:
     def test_aiagent_keeps_aggregator_vendor_slug(self):
         with (
             patch(
-                "run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")
+                "run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")
             ),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("run_agent.OpenAI"),
@@ -208,7 +208,7 @@ def _mock_assistant_msg(
     return msg
 
 
-def _mock_tool_call(name="web_search", arguments="{}", call_id=None):
+def _mock_tool_call(name="web_extract", arguments="{}", call_id=None):
     """Return a SimpleNamespace mimicking a tool call object."""
     return SimpleNamespace(
         id=call_id or f"call_{uuid.uuid4().hex[:8]}",
@@ -362,7 +362,7 @@ class TestStripThinkBlocks:
         assert "Use the" in result
 
     def test_mixed_case_closed_pair_stripped(self, agent):
-        """Mixed-case variants <THINK>â€¦</THINK>, <Thinking>â€¦</Thinking> are
+        """Mixed-case variants <THINK>â€?/THINK>, <Thinking>â€?/Thinking> are
         handled by case-insensitive closed-pair regex, so the trailing
         content is preserved."""
         result = agent._strip_think_blocks("<THINK>upper</THINK>final")
@@ -594,7 +594,7 @@ class TestInit:
 
     def test_valid_tool_names_populated(self):
         """valid_tool_names should contain names from loaded tools."""
-        tools = _make_tool_defs("web_search", "terminal")
+        tools = _make_tool_defs("web_extract", "terminal")
         with (
             patch("run_agent.get_tool_definitions", return_value=tools),
             patch("run_agent.check_toolset_requirements", return_value={}),
@@ -607,7 +607,7 @@ class TestInit:
                 skip_context_files=True,
                 skip_memory=True,
             )
-            assert a.valid_tool_names == {"web_search", "terminal"}
+            assert a.valid_tool_names == {"web_extract", "terminal"}
 
     def test_session_id_auto_generated(self):
         """Session ID should be auto-generated in YYYYMMDD_HHMMSS_<hex6> format."""
@@ -736,9 +736,9 @@ class TestBuildSystemPrompt:
         assert "NOUS SUBSCRIPTION BLOCK" in prompt
 
     def test_skills_prompt_derives_available_toolsets_from_loaded_tools(self):
-        tools = _make_tool_defs("web_search", "skills_list", "skill_view", "skill_manage")
+        tools = _make_tool_defs("web_extract", "skills_list", "skill_view", "skill_manage")
         toolset_map = {
-            "web_search": "web",
+            "web_extract": "web",
             "skills_list": "skills",
             "skill_view": "skills",
             "skill_manage": "skills",
@@ -777,7 +777,7 @@ class TestToolUseEnforcementConfig:
         with (
             patch(
                 "run_agent.get_tool_definitions",
-                return_value=_make_tool_defs("terminal", "web_search"),
+                return_value=_make_tool_defs("terminal", "web_extract"),
             ),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("run_agent.OpenAI"),
@@ -992,7 +992,7 @@ class TestBuildApiKwargs:
 
     def test_kimi_coding_endpoint_disables_thinking(self, agent):
         """When reasoning_config.enabled=False, thinking should be disabled
-        and reasoning_effort should be omitted entirely â€” mirroring Kimi
+        and reasoning_effort should be omitted entirely â€?mirroring Kimi
         CLI's with_thinking("off") which maps to reasoning_effort=None."""
         agent.base_url = "https://api.kimi.com/coding/v1"
         agent._base_url_lower = agent.base_url.lower()
@@ -1226,11 +1226,11 @@ class TestBuildAssistantMessage:
         assert result["reasoning_content"] == "provider scratchpad"
 
     def test_with_tool_calls(self, agent):
-        tc = _mock_tool_call(name="web_search", arguments='{"q":"test"}', call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments='{"q":"test"}', call_id="c1")
         msg = _mock_assistant_msg(content="", tool_calls=[tc])
         result = agent._build_assistant_message(msg, "tool_calls")
         assert len(result["tool_calls"]) == 1
-        assert result["tool_calls"][0]["function"]["name"] == "web_search"
+        assert result["tool_calls"][0]["function"]["name"] == "web_extract"
 
     def test_with_reasoning_details(self, agent):
         details = [{"type": "reasoning.summary", "text": "step1", "signature": "sig1"}]
@@ -1259,7 +1259,7 @@ class TestBuildAssistantMessage:
 
     def test_tool_call_without_extra_content(self, agent):
         """Standard tool calls (no thinking model) should not have extra_content."""
-        tc = _mock_tool_call(name="web_search", arguments="{}", call_id="c3")
+        tc = _mock_tool_call(name="web_extract", arguments="{}", call_id="c3")
         msg = _mock_assistant_msg(content="", tool_calls=[tc])
         result = agent._build_assistant_message(msg, "tool_calls")
         assert "extra_content" not in result["tool_calls"][0]
@@ -1306,19 +1306,19 @@ class TestFormatToolsForSystemMessage:
         assert agent._format_tools_for_system_message() == "[]"
 
     def test_formats_single_tool(self, agent):
-        agent.tools = _make_tool_defs("web_search")
+        agent.tools = _make_tool_defs("web_extract")
         result = agent._format_tools_for_system_message()
         parsed = json.loads(result)
         assert len(parsed) == 1
-        assert parsed[0]["name"] == "web_search"
+        assert parsed[0]["name"] == "web_extract"
 
     def test_formats_multiple_tools(self, agent):
-        agent.tools = _make_tool_defs("web_search", "terminal", "read_file")
+        agent.tools = _make_tool_defs("web_extract", "terminal", "read_file")
         result = agent._format_tools_for_system_message()
         parsed = json.loads(result)
         assert len(parsed) == 3
         names = {t["name"] for t in parsed}
-        assert names == {"web_search", "terminal", "read_file"}
+        assert names == {"web_extract", "terminal", "read_file"}
 
 
 # ===================================================================
@@ -1328,7 +1328,7 @@ class TestFormatToolsForSystemMessage:
 
 class TestExecuteToolCalls:
     def test_single_tool_executed(self, agent):
-        tc = _mock_tool_call(name="web_search", arguments='{"q":"test"}', call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments='{"q":"test"}', call_id="c1")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc])
         messages = []
         with patch(
@@ -1337,15 +1337,15 @@ class TestExecuteToolCalls:
             agent._execute_tool_calls(mock_msg, messages, "task-1")
             # enabled_tools passes the agent's own valid_tool_names
             args, kwargs = mock_hfc.call_args
-            assert args[:3] == ("web_search", {"q": "test"}, "task-1")
+            assert args[:3] == ("web_extract", {"q": "test"}, "task-1")
             assert set(kwargs.get("enabled_tools", [])) == agent.valid_tool_names
         assert len(messages) == 1
         assert messages[0]["role"] == "tool"
         assert "search result" in messages[0]["content"]
 
     def test_interrupt_skips_remaining(self, agent):
-        tc1 = _mock_tool_call(name="web_search", arguments="{}", call_id="c1")
-        tc2 = _mock_tool_call(name="web_search", arguments="{}", call_id="c2")
+        tc1 = _mock_tool_call(name="web_extract", arguments="{}", call_id="c1")
+        tc2 = _mock_tool_call(name="web_extract", arguments="{}", call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
 
@@ -1362,7 +1362,7 @@ class TestExecuteToolCalls:
 
     def test_invalid_json_args_defaults_empty(self, agent):
         tc = _mock_tool_call(
-            name="web_search", arguments="not valid json", call_id="c1"
+            name="web_extract", arguments="not valid json", call_id="c1"
         )
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc])
         messages = []
@@ -1370,7 +1370,7 @@ class TestExecuteToolCalls:
             agent._execute_tool_calls(mock_msg, messages, "task-1")
             # Invalid JSON args should fall back to empty dict
             args, kwargs = mock_hfc.call_args
-            assert args[:3] == ("web_search", {}, "task-1")
+            assert args[:3] == ("web_extract", {}, "task-1")
             assert set(kwargs.get("enabled_tools", [])) == agent.valid_tool_names
         assert len(messages) == 1
         assert messages[0]["role"] == "tool"
@@ -1379,7 +1379,7 @@ class TestExecuteToolCalls:
     def test_result_truncation_over_100k(self, agent, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path / ".hermes"))
         (tmp_path / ".hermes").mkdir()
-        tc = _mock_tool_call(name="web_search", arguments="{}", call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments="{}", call_id="c1")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc])
         messages = []
         big_result = "x" * 150_000
@@ -1390,7 +1390,7 @@ class TestExecuteToolCalls:
         assert ("Truncated" in messages[0]["content"] or "<persisted-output>" in messages[0]["content"])
 
     def test_quiet_tool_output_suppressed_when_progress_callback_present(self, agent):
-        tc = _mock_tool_call(name="web_search", arguments='{"q":"test"}', call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments='{"q":"test"}', call_id="c1")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc])
         messages = []
         agent.tool_progress_callback = lambda *args, **kwargs: None
@@ -1404,7 +1404,7 @@ class TestExecuteToolCalls:
         assert messages[0]["role"] == "tool"
 
     def test_quiet_tool_output_prints_without_progress_callback(self, agent):
-        tc = _mock_tool_call(name="web_search", arguments='{"q":"test"}', call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments='{"q":"test"}', call_id="c1")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc])
         messages = []
         agent.platform = "cli"
@@ -1420,7 +1420,7 @@ class TestExecuteToolCalls:
         assert messages[0]["role"] == "tool"
 
     def test_quiet_tool_output_suppressed_without_progress_callback_for_non_cli_agent(self, agent):
-        tc = _mock_tool_call(name="web_search", arguments='{"q":"test"}', call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments='{"q":"test"}', call_id="c1")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc])
         messages = []
         agent.platform = None
@@ -1482,7 +1482,7 @@ class TestConcurrentToolExecution:
 
     def test_single_tool_uses_sequential_path(self, agent):
         """Single tool call should use sequential path, not concurrent."""
-        tc = _mock_tool_call(name="web_search", arguments='{"q":"test"}', call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments='{"q":"test"}', call_id="c1")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc])
         messages = []
         with patch.object(agent, "_execute_tool_calls_sequential") as mock_seq:
@@ -1493,7 +1493,7 @@ class TestConcurrentToolExecution:
 
     def test_clarify_forces_sequential(self, agent):
         """Batch containing clarify should use sequential path."""
-        tc1 = _mock_tool_call(name="web_search", arguments='{}', call_id="c1")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c1")
         tc2 = _mock_tool_call(name="clarify", arguments='{"question":"ok?"}', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
@@ -1505,7 +1505,7 @@ class TestConcurrentToolExecution:
 
     def test_multiple_tools_uses_concurrent_path(self, agent):
         """Multiple read-only tools should use concurrent path."""
-        tc1 = _mock_tool_call(name="web_search", arguments='{}', call_id="c1")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c1")
         tc2 = _mock_tool_call(name="read_file", arguments='{"path":"x.py"}', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
@@ -1517,7 +1517,7 @@ class TestConcurrentToolExecution:
 
     def test_terminal_batch_forces_sequential(self, agent):
         """Stateful tools should not share the concurrent execution path."""
-        tc1 = _mock_tool_call(name="web_search", arguments='{}', call_id="c1")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c1")
         tc2 = _mock_tool_call(name="terminal", arguments='{"command":"pwd"}', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
@@ -1581,8 +1581,8 @@ class TestConcurrentToolExecution:
 
     def test_malformed_json_args_forces_sequential(self, agent):
         """Unparseable tool arguments should fall back to sequential."""
-        tc1 = _mock_tool_call(name="web_search", arguments='{}', call_id="c1")
-        tc2 = _mock_tool_call(name="web_search", arguments="NOT JSON {{{", call_id="c2")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c1")
+        tc2 = _mock_tool_call(name="web_extract", arguments="NOT JSON {{{", call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
         with patch.object(agent, "_execute_tool_calls_sequential") as mock_seq:
@@ -1593,8 +1593,8 @@ class TestConcurrentToolExecution:
 
     def test_non_dict_args_forces_sequential(self, agent):
         """Tool arguments that parse to a non-dict type should fall back to sequential."""
-        tc1 = _mock_tool_call(name="web_search", arguments='{}', call_id="c1")
-        tc2 = _mock_tool_call(name="web_search", arguments='"just a string"', call_id="c2")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c1")
+        tc2 = _mock_tool_call(name="web_extract", arguments='"just a string"', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
         with patch.object(agent, "_execute_tool_calls_sequential") as mock_seq:
@@ -1605,9 +1605,9 @@ class TestConcurrentToolExecution:
 
     def test_concurrent_executes_all_tools(self, agent):
         """Concurrent path should execute all tools and append results in order."""
-        tc1 = _mock_tool_call(name="web_search", arguments='{"q":"alpha"}', call_id="c1")
-        tc2 = _mock_tool_call(name="web_search", arguments='{"q":"beta"}', call_id="c2")
-        tc3 = _mock_tool_call(name="web_search", arguments='{"q":"gamma"}', call_id="c3")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{"q":"alpha"}', call_id="c1")
+        tc2 = _mock_tool_call(name="web_extract", arguments='{"q":"beta"}', call_id="c2")
+        tc3 = _mock_tool_call(name="web_extract", arguments='{"q":"gamma"}', call_id="c3")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2, tc3])
         messages = []
 
@@ -1636,8 +1636,8 @@ class TestConcurrentToolExecution:
         """Even if tools finish in different order, messages should be in original order."""
         import time as _time
 
-        tc1 = _mock_tool_call(name="web_search", arguments='{"q":"slow"}', call_id="c1")
-        tc2 = _mock_tool_call(name="web_search", arguments='{"q":"fast"}', call_id="c2")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{"q":"slow"}', call_id="c1")
+        tc2 = _mock_tool_call(name="web_extract", arguments='{"q":"fast"}', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
 
@@ -1657,8 +1657,8 @@ class TestConcurrentToolExecution:
 
     def test_concurrent_handles_tool_error(self, agent):
         """If one tool raises, others should still complete."""
-        tc1 = _mock_tool_call(name="web_search", arguments='{}', call_id="c1")
-        tc2 = _mock_tool_call(name="web_search", arguments='{}', call_id="c2")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c1")
+        tc2 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
 
@@ -1680,7 +1680,7 @@ class TestConcurrentToolExecution:
 
     def test_concurrent_interrupt_before_start(self, agent):
         """If interrupt is requested before concurrent execution, all tools are skipped."""
-        tc1 = _mock_tool_call(name="web_search", arguments='{}', call_id="c1")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c1")
         tc2 = _mock_tool_call(name="read_file", arguments='{}', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
@@ -1697,8 +1697,8 @@ class TestConcurrentToolExecution:
         """Concurrent path should save oversized results to file."""
         monkeypatch.setenv("HERMES_HOME", str(tmp_path / ".hermes"))
         (tmp_path / ".hermes").mkdir()
-        tc1 = _mock_tool_call(name="web_search", arguments='{}', call_id="c1")
-        tc2 = _mock_tool_call(name="web_search", arguments='{}', call_id="c2")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c1")
+        tc2 = _mock_tool_call(name="web_extract", arguments='{}', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
         big_result = "x" * 150_000
@@ -1714,9 +1714,9 @@ class TestConcurrentToolExecution:
     def test_invoke_tool_dispatches_to_handle_function_call(self, agent):
         """_invoke_tool should route regular tools through handle_function_call."""
         with patch("run_agent.handle_function_call", return_value="result") as mock_hfc:
-            result = agent._invoke_tool("web_search", {"q": "test"}, "task-1")
+            result = agent._invoke_tool("web_extract", {"q": "test"}, "task-1")
             mock_hfc.assert_called_once_with(
-                "web_search", {"q": "test"}, "task-1",
+                "web_extract", {"q": "test"}, "task-1",
                 tool_call_id=None,
                 session_id=agent.session_id,
                 enabled_tools=list(agent.valid_tool_names),
@@ -1725,7 +1725,7 @@ class TestConcurrentToolExecution:
             assert result == "result"
 
     def test_sequential_tool_callbacks_fire_in_order(self, agent):
-        tool_call = _mock_tool_call(name="web_search", arguments='{"query":"hello"}', call_id="c1")
+        tool_call = _mock_tool_call(name="web_extract", arguments='{"query":"hello"}', call_id="c1")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tool_call])
         messages = []
         starts = []
@@ -1736,12 +1736,12 @@ class TestConcurrentToolExecution:
         with patch("run_agent.handle_function_call", return_value='{"success": true}'):
             agent._execute_tool_calls_sequential(mock_msg, messages, "task-1")
 
-        assert starts == [("c1", "web_search", {"query": "hello"})]
-        assert completes == [("c1", "web_search", {"query": "hello"}, '{"success": true}')]
+        assert starts == [("c1", "web_extract", {"query": "hello"})]
+        assert completes == [("c1", "web_extract", {"query": "hello"}, '{"success": true}')]
 
     def test_concurrent_tool_callbacks_fire_for_each_tool(self, agent):
-        tc1 = _mock_tool_call(name="web_search", arguments='{"query":"one"}', call_id="c1")
-        tc2 = _mock_tool_call(name="web_search", arguments='{"query":"two"}', call_id="c2")
+        tc1 = _mock_tool_call(name="web_extract", arguments='{"query":"one"}', call_id="c1")
+        tc2 = _mock_tool_call(name="web_extract", arguments='{"query":"two"}', call_id="c2")
         mock_msg = _mock_assistant_msg(content="", tool_calls=[tc1, tc2])
         messages = []
         starts = []
@@ -1753,8 +1753,8 @@ class TestConcurrentToolExecution:
             agent._execute_tool_calls_concurrent(mock_msg, messages, "task-1")
 
         assert starts == [
-            ("c1", "web_search", {"query": "one"}),
-            ("c2", "web_search", {"query": "two"}),
+            ("c1", "web_extract", {"query": "one"}),
+            ("c2", "web_extract", {"query": "two"}),
         ]
         assert len(completes) == 2
         assert {entry[0] for entry in completes} == {"c1", "c2"}
@@ -1786,7 +1786,7 @@ class TestConcurrentToolExecution:
             lambda *args, **kwargs: "Blocked",
         )
         with patch("run_agent.handle_function_call", side_effect=AssertionError("should not run")):
-            result = agent._invoke_tool("web_search", {"q": "test"}, "task-1")
+            result = agent._invoke_tool("web_extract", {"q": "test"}, "task-1")
 
         assert json.loads(result) == {"error": "Blocked"}
 
@@ -1965,7 +1965,7 @@ class TestRunConversation:
 
     def test_tool_calls_then_stop(self, agent):
         self._setup_agent(agent)
-        tc = _mock_tool_call(name="web_search", arguments="{}", call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments="{}", call_id="c1")
         resp1 = _mock_response(content="", finish_reason="tool_calls", tool_calls=[tc])
         resp2 = _mock_response(content="Done searching", finish_reason="stop")
         agent.client.chat.completions.create.side_effect = [resp1, resp2]
@@ -1983,7 +1983,7 @@ class TestRunConversation:
 
     def test_request_scoped_api_hooks_fire_for_each_api_call(self, agent):
         self._setup_agent(agent)
-        tc = _mock_tool_call(name="web_search", arguments="{}", call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments="{}", call_id="c1")
         resp1 = _mock_response(content="", finish_reason="tool_calls", tool_calls=[tc])
         resp2 = _mock_response(content="Done searching", finish_reason="stop")
         agent.client.chat.completions.create.side_effect = [resp1, resp2]
@@ -2017,7 +2017,7 @@ class TestRunConversation:
     def test_content_with_tool_calls_stays_silent_for_non_cli_quiet_mode(self, agent):
         self._setup_agent(agent)
         agent.platform = None
-        tc = _mock_tool_call(name="web_search", arguments="{}", call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments="{}", call_id="c1")
         resp1 = _mock_response(
             content="I'll search for that.",
             finish_reason="tool_calls",
@@ -2077,7 +2077,7 @@ class TestRunConversation:
         assert result["api_calls"] == 2
 
     def test_reasoning_only_local_resumed_no_compression_triggered(self, agent):
-        """Reasoning-only responses no longer trigger compression â€” prefill then accepted."""
+        """Reasoning-only responses no longer trigger compression â€?prefill then accepted."""
         self._setup_agent(agent)
         agent.base_url = "http://127.0.0.1:1234/v1"
         agent.compression_enabled = True
@@ -2148,7 +2148,7 @@ class TestRunConversation:
         assert result["completed"] is True
         assert result["final_response"] == "Here is the actual answer."
         assert result["api_calls"] == 2  # 1 original + 1 prefill continuation
-        # Prefill message should be cleaned up â€” no consecutive assistant messages
+        # Prefill message should be cleaned up â€?no consecutive assistant messages
         roles = [m.get("role") for m in result["messages"]]
         for i in range(len(roles) - 1):
             if roles[i] == "assistant" and roles[i + 1] == "assistant":
@@ -2427,7 +2427,7 @@ class TestRunConversation:
         self._setup_agent(agent)
         agent.compression_enabled = True
 
-        tc = _mock_tool_call(name="web_search", arguments="{}", call_id="c1")
+        tc = _mock_tool_call(name="web_extract", arguments="{}", call_id="c1")
         resp1 = _mock_response(content="", finish_reason="tool_calls", tool_calls=[tc])
         resp2 = _mock_response(content="All done", finish_reason="stop")
         agent.client.chat.completions.create.side_effect = [resp1, resp2]
@@ -2514,7 +2514,7 @@ class TestRunConversation:
         tool_turn = _mock_response(
             content="",
             finish_reason="tool_calls",
-            tool_calls=[_mock_tool_call(name="web_search", arguments="{}", call_id="c1")],
+            tool_calls=[_mock_tool_call(name="web_extract", arguments="{}", call_id="c1")],
         )
         misreported_stop = _mock_response(
             content="Based on the search results, the best next",
@@ -2559,7 +2559,7 @@ class TestRunConversation:
         tool_turn = _mock_response(
             content="",
             finish_reason="tool_calls",
-            tool_calls=[_mock_tool_call(name="web_search", arguments="{}", call_id="c1")],
+            tool_calls=[_mock_tool_call(name="web_extract", arguments="{}", call_id="c1")],
         )
         complete_stop = _mock_response(
             content="Based on the search results, the best next step is to update the config.",
@@ -2592,7 +2592,7 @@ class TestRunConversation:
         tool_turn = _mock_response(
             content="",
             finish_reason="tool_calls",
-            tool_calls=[_mock_tool_call(name="web_search", arguments="{}", call_id="c1")],
+            tool_calls=[_mock_tool_call(name="web_extract", arguments="{}", call_id="c1")],
         )
         normal_stop = _mock_response(
             content="Based on the search results, the best next",
@@ -2628,7 +2628,7 @@ class TestRunConversation:
         ):
             result = agent.run_conversation("hello")
 
-        # Should return immediately â€” no continuation, only 1 API call
+        # Should return immediately â€?no continuation, only 1 API call
         assert result["completed"] is False
         assert result["api_calls"] == 1
         assert "reasoning" in result["error"].lower()
@@ -2707,7 +2707,7 @@ class TestRunConversation:
             patch.object(agent, "_save_trajectory"),
             patch.object(agent, "_cleanup_task_resources"),
         ):
-            # First call: truncated â†’ retry. Second: valid â†’ execute tool.
+            # First call: truncated â†?retry. Second: valid â†?execute tool.
             # Third: final text response.
             final_resp = _mock_response(content="Done!", finish_reason="stop")
             agent.client.chat.completions.create.side_effect = [
@@ -3214,7 +3214,7 @@ class TestSystemPromptStability:
             {"role": "assistant", "content": "hi"},
         ]
 
-        # First call â€” _cached_system_prompt is None, history is non-empty
+        # First call â€?_cached_system_prompt is None, history is non-empty
         agent._cached_system_prompt = None
 
         # Patch run_conversation internals to just test the system prompt logic.
@@ -3367,7 +3367,7 @@ class TestSafeWriter:
             sys.stdout = original_stdout
             sys.stderr = original_stderr
 
-    # test_installed_before_init_time_honcho_error_prints removed â€”
+    # test_installed_before_init_time_honcho_error_prints removed â€?
     # Honcho integration extracted to plugin (PR #4154).
 
     def test_double_wrap_prevented(self):
@@ -3573,7 +3573,7 @@ class TestFallbackAnthropicProvider:
 
 def test_aiagent_uses_copilot_acp_client():
     with (
-        patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")),
+        patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")),
         patch("run_agent.check_toolset_requirements", return_value={}),
         patch("run_agent.OpenAI") as mock_openai,
         patch("agent.copilot_acp_client.CopilotACPClient") as mock_acp_client,
@@ -3669,7 +3669,7 @@ class TestAnthropicBaseUrlPassthrough:
 
     def test_custom_proxy_base_url_passed_through(self):
         with (
-            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")),
+            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("agent.anthropic_adapter.build_anthropic_client") as mock_build,
         ):
@@ -3688,7 +3688,7 @@ class TestAnthropicBaseUrlPassthrough:
 
     def test_none_base_url_passed_as_none(self):
         with (
-            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")),
+            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("agent.anthropic_adapter.build_anthropic_client") as mock_build,
         ):
@@ -3709,7 +3709,7 @@ class TestAnthropicBaseUrlPassthrough:
 class TestAnthropicCredentialRefresh:
     def test_try_refresh_anthropic_client_credentials_rebuilds_client(self):
         with (
-            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")),
+            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("agent.anthropic_adapter.build_anthropic_client") as mock_build,
         ):
@@ -3745,7 +3745,7 @@ class TestAnthropicCredentialRefresh:
 
     def test_try_refresh_anthropic_client_credentials_returns_false_when_token_unchanged(self):
         with (
-            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")),
+            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("agent.anthropic_adapter.build_anthropic_client", return_value=MagicMock()),
         ):
@@ -3773,7 +3773,7 @@ class TestAnthropicCredentialRefresh:
 
     def test_anthropic_messages_create_preflights_refresh(self):
         with (
-            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")),
+            patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")),
             patch("run_agent.check_toolset_requirements", return_value={}),
             patch("agent.anthropic_adapter.build_anthropic_client", return_value=MagicMock()),
         ):
@@ -3816,7 +3816,7 @@ def _make_tc_delta(index=0, tc_id=None, name=None, arguments=None):
 
 
 class TestStreamingApiCall:
-    """Tests for _streaming_api_call â€” voice TTS streaming pipeline."""
+    """Tests for _streaming_api_call â€?voice TTS streaming pipeline."""
 
     def test_content_assembly(self, agent):
         chunks = [
@@ -3844,7 +3844,7 @@ class TestStreamingApiCall:
         # The accumulator uses assignment for names (immune to MiniMax/NIM
         # resends of the full name) and `+=` for arguments.
         chunks = [
-            _make_chunk(tool_calls=[_make_tc_delta(0, "call_1", "web_search", '{"q":')]),
+            _make_chunk(tool_calls=[_make_tc_delta(0, "call_1", "web_extract", '{"q":')]),
             _make_chunk(tool_calls=[_make_tc_delta(0, None, None, '"test"}')]),
             _make_chunk(finish_reason="tool_calls"),
         ]
@@ -3854,7 +3854,7 @@ class TestStreamingApiCall:
 
         tc = resp.choices[0].message.tool_calls
         assert len(tc) == 1
-        assert tc[0].function.name == "web_search"
+        assert tc[0].function.name == "web_extract"
         assert tc[0].function.arguments == '{"q":"test"}'
         assert tc[0].id == "call_1"
 
@@ -4028,7 +4028,7 @@ class TestInterruptVprintForceTrue:
     """All interrupt _vprint calls must use force=True so they are always visible."""
 
     def test_all_interrupt_vprint_have_force_true(self):
-        """Scan source for _vprint calls containing 'Interrupt' â€” each must have force=True."""
+        """Scan source for _vprint calls containing 'Interrupt' â€?each must have force=True."""
         import inspect
         source = inspect.getsource(AIAgent)
         lines = source.split("\n")
@@ -4180,7 +4180,7 @@ class TestPersistUserMessageOverride:
             {
                 "role": "user",
                 "content": (
-                    "[Voice input â€” respond concisely and conversationally, "
+                    "[Voice input â€?respond concisely and conversationally, "
                     "2-3 sentences max. No code blocks or markdown.] Hello there"
                 ),
             },
@@ -4255,7 +4255,7 @@ class TestReasoningReplayForStrictProviders:
                 {
                     "id": "c1",
                     "type": "function",
-                    "function": {"name": "web_search", "arguments": "{\"q\":\"test\"}"},
+                    "function": {"name": "web_extract", "arguments": "{\"q\":\"test\"}"},
                 }
             ],
             "reasoning": "summary reasoning",
@@ -4323,12 +4323,12 @@ class TestNormalizeCodexDictArguments:
             status=item_status,
         )
         if item_type == "function_call":
-            item.name = "web_search"
+            item.name = "web_extract"
             item.arguments = arguments
             item.call_id = "call_abc123"
             item.id = "fc_abc123"
         elif item_type == "custom_tool_call":
-            item.name = "web_search"
+            item.name = "web_extract"
             item.input = arguments
             item.call_id = "call_abc123"
             item.id = "fc_abc123"
@@ -4508,7 +4508,7 @@ class TestMemoryContextSanitization:
 
     def test_memory_context_stripped_from_user_message(self):
         """Verify that <memory-context> blocks are removed before the message
-        enters the conversation loop â€” prevents stale Honcho injection from
+        enters the conversation loop â€?prevents stale Honcho injection from
         leaking into user text."""
         import inspect
         src = inspect.getsource(AIAgent.run_conversation)
@@ -4540,7 +4540,7 @@ class TestMemoryProviderTurnStart:
     """run_conversation() must call memory_manager.on_turn_start() before prefetch_all().
 
     Without this call, providers like Honcho never update _turn_count, so cadence
-    checks (contextCadence, dialecticCadence) are always satisfied â€” every turn
+    checks (contextCadence, dialecticCadence) are always satisfied â€?every turn
     fires both context refresh and dialectic, ignoring the configured cadence.
     """
 

@@ -1,4 +1,4 @@
-"""Tests for model_tools.py â€” function call dispatch, agent-loop interception, legacy toolsets."""
+"""Tests for model_tools.py â€?function call dispatch, agent-loop interception, legacy toolsets."""
 
 import json
 from unittest.mock import call, patch
@@ -33,7 +33,7 @@ class TestHandleFunctionCall:
 
     def test_exception_returns_json_error(self):
         # Even if something goes wrong, should return valid JSON
-        result = handle_function_call("web_search", None)  # None args may cause issues
+        result = handle_function_call("web_extract", None)  # None args may cause issues
         parsed = json.loads(result)
         assert isinstance(parsed, dict)
         assert "error" in parsed
@@ -46,7 +46,7 @@ class TestHandleFunctionCall:
             patch("hermes_cli.plugins.invoke_hook") as mock_invoke_hook,
         ):
             result = handle_function_call(
-                "web_search",
+                "web_extract",
                 {"q": "test"},
                 task_id="task-1",
                 tool_call_id="call-1",
@@ -57,7 +57,7 @@ class TestHandleFunctionCall:
         assert mock_invoke_hook.call_args_list == [
             call(
                 "pre_tool_call",
-                tool_name="web_search",
+                tool_name="web_extract",
                 args={"q": "test"},
                 task_id="task-1",
                 session_id="session-1",
@@ -65,7 +65,7 @@ class TestHandleFunctionCall:
             ),
             call(
                 "post_tool_call",
-                tool_name="web_search",
+                tool_name="web_extract",
                 args={"q": "test"},
                 result='{"ok":true}',
                 task_id="task-1",
@@ -74,7 +74,7 @@ class TestHandleFunctionCall:
             ),
             call(
                 "transform_tool_result",
-                tool_name="web_search",
+                tool_name="web_extract",
                 args={"q": "test"},
                 result='{"ok":true}',
                 task_id="task-1",
@@ -96,7 +96,7 @@ class TestAgentLoopTools:
         assert "delegate_task" in _AGENT_LOOP_TOOLS
 
     def test_no_regular_tools_in_set(self):
-        assert "web_search" not in _AGENT_LOOP_TOOLS
+        assert "web_extract" not in _AGENT_LOOP_TOOLS
         assert "terminal" not in _AGENT_LOOP_TOOLS
 
 
@@ -142,12 +142,12 @@ class TestPreToolCallBlocking:
         monkeypatch.setattr("tools.file_tools.notify_other_tool_call",
                             lambda task_id: notifications.append(task_id))
 
-        result = json.loads(handle_function_call("web_search", {"q": "test"}, task_id="t1"))
+        result = json.loads(handle_function_call("web_extract", {"q": "test"}, task_id="t1"))
         assert result == {"error": "Blocked"}
         assert notifications == []
 
     def test_invalid_hook_returns_do_not_block(self, monkeypatch):
-        """Malformed hook returns should be ignored â€” tool executes normally."""
+        """Malformed hook returns should be ignored â€?tool executes normally."""
         def fake_invoke_hook(hook_name, **kwargs):
             if hook_name == "pre_tool_call":
                 return [
@@ -176,11 +176,11 @@ class TestPreToolCallBlocking:
         monkeypatch.setattr("model_tools.registry.dispatch",
                             lambda *a, **kw: json.dumps({"ok": True}))
 
-        handle_function_call("web_search", {"q": "test"}, task_id="t1",
+        handle_function_call("web_extract", {"q": "test"}, task_id="t1",
                              skip_pre_tool_call_hook=True)
 
         # Hook still fires for observer notification, but get_pre_tool_call_block_message
-        # is not called â€” invoke_hook fires directly in the skip=True branch.
+        # is not called â€?invoke_hook fires directly in the skip=True branch.
         assert "pre_tool_call" in hook_calls
         assert "post_tool_call" in hook_calls
 
@@ -216,11 +216,11 @@ class TestBackwardCompat:
         assert isinstance(names, list)
         assert len(names) > 0
         # Should contain well-known tools
-        assert "web_search" in names
+        assert "web_extract" in names
         assert "terminal" in names
 
     def test_get_toolset_for_tool(self):
-        result = get_toolset_for_tool("web_search")
+        result = get_toolset_for_tool("web_extract")
         assert result is not None
         assert isinstance(result, str)
 

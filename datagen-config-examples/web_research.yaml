@@ -27,10 +27,10 @@ max_items: 500
 # Model to use for generation (override with --model flag)
 model: openrouter/nousresearch/hermes-3-llama-3.1-405b
 
-# System prompt additions (ephemeral â€” not saved to trajectories)
+# System prompt additions (ephemeral â€?not saved to trajectories)
 ephemeral_system_prompt: |
   You are a highly capable research agent. When asked a factual question,
-  always use web_search to find current, accurate information before answering.
+  always use web_extract to find current, accurate information before answering.
   Cite at least 2 sources. Be concise and accurate.
 
 # Output directory

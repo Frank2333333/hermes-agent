@@ -55,7 +55,6 @@ SANDBOX_AVAILABLE = sys.platform != "win32"
 # The 7 tools allowed inside the sandbox. The intersection of this list
 # and the session's enabled tools determines which stubs are generated.
 SANDBOX_ALLOWED_TOOLS = frozenset([
-    "web_search",
     "web_extract",
     "read_file",
     "write_file",
@@ -83,12 +82,6 @@ def check_sandbox_requirements() -> bool:
 # Per-tool stub templates: (function_name, signature, docstring, args_dict_expr)
 # The args_dict_expr builds the JSON payload sent over the RPC socket.
 _TOOL_STUBS = {
-    "web_search": (
-        "web_search",
-        "query: str, limit: int = 5",
-        '"""Search the web. Returns dict with data.web list of {url, title, description}."""',
-        '{"query": query, "limit": limit}',
-    ),
     "web_extract": (
         "web_extract",
         "urls: list",
@@ -1443,9 +1436,6 @@ def _resolve_child_cwd(mode: str, staging_dir: str) -> str:
 # Per-tool documentation lines for the execute_code description.
 # Ordered to match the canonical display order.
 _TOOL_DOC_LINES = [
-    ("web_search",
-     "  web_search(query: str, limit: int = 5) -> dict\n"
-     "    Returns {\"data\": {\"web\": [{\"url\", \"title\", \"description\"}, ...]}}"),
     ("web_extract",
      "  web_extract(urls: list[str]) -> dict\n"
      "    Returns {\"results\": [{\"url\", \"title\", \"content\", \"error\"}, ...]} where content is markdown"),
@@ -1472,7 +1462,7 @@ def build_execute_code_schema(enabled_sandbox_tools: set = None,
     """Build the execute_code schema with description listing only enabled tools.
 
     When tools are disabled via ``hermes tools`` (e.g. web is turned off),
-    the schema description should NOT mention web_search / web_extract —
+    the schema description should NOT mention web_extract —
     otherwise the model thinks they are available and keeps trying to use them.
 
     ``mode`` controls the working-directory sentence in the description:
@@ -1492,7 +1482,7 @@ def build_execute_code_schema(enabled_sandbox_tools: set = None,
     )
 
     # Build example import list from enabled tools
-    import_examples = [n for n in ("web_search", "terminal") if n in enabled_sandbox_tools]
+    import_examples = [n for n in ("web_extract", "terminal") if n in enabled_sandbox_tools]
     if not import_examples:
         import_examples = sorted(enabled_sandbox_tools)[:2]
     if import_examples:

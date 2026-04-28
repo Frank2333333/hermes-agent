@@ -617,7 +617,7 @@ class TestNewEndpoints:
             tools_config,
             "_get_effective_configurable_toolsets",
             lambda: [
-                ("web", "🔍 Web Search & Scraping", "web_search, web_extract"),
+                ("web", "🔍 Web Extraction", "web_extract, web_extract"),
                 ("skills", "📚 Skills", "list, view, manage"),
                 ("memory", "💾 Memory", "persistent memory across sessions"),
             ],
@@ -636,7 +636,7 @@ class TestNewEndpoints:
             toolsets_module,
             "resolve_toolset",
             lambda name: {
-                "web": ["web_search", "web_extract"],
+                "web": ["web_extract", "web_extract"],
                 "skills": ["skills_list", "skill_view"],
                 "memory": ["memory_read"],
             }[name],
@@ -649,12 +649,12 @@ class TestNewEndpoints:
         assert resp.json() == [
             {
                 "name": "web",
-                "label": "🔍 Web Search & Scraping",
-                "description": "web_search, web_extract",
+                "label": "🔍 Web Extraction",
+                "description": "web_extract, web_extract",
                 "enabled": True,
                 "available": True,
                 "configured": False,
-                "tools": ["web_extract", "web_search"],
+                "tools": ["web_extract", "web_extract"],
             },
             {
                 "name": "skills",

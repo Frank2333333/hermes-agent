@@ -1,7 +1,7 @@
 ---
 name: research-paper-writing
 title: Research Paper Writing Pipeline
-description: End-to-end pipeline for writing ML/AI research papers — from experiment design through analysis, drafting, revision, and submission. Covers NeurIPS, ICML, ICLR, ACL, AAAI, COLM. Integrates automated experiment monitoring, statistical analysis, iterative writing, and citation verification.
+description: End-to-end pipeline for writing ML/AI research papers �?from experiment design through analysis, drafting, revision, and submission. Covers NeurIPS, ICML, ICLR, ACL, AAAI, COLM. Integrates automated experiment monitoring, statistical analysis, iterative writing, and citation verification.
 version: 1.1.0
 author: Orchestra Research
 license: MIT
@@ -20,26 +20,26 @@ metadata:
 
 End-to-end pipeline for producing publication-ready ML/AI research papers targeting **NeurIPS, ICML, ICLR, ACL, AAAI, and COLM**. This skill covers the full research lifecycle: experiment design, execution, monitoring, analysis, paper writing, review, revision, and submission.
 
-This is **not a linear pipeline** — it is an iterative loop. Results trigger new experiments. Reviews trigger new analysis. The agent must handle these feedback loops.
+This is **not a linear pipeline** �?it is an iterative loop. Results trigger new experiments. Reviews trigger new analysis. The agent must handle these feedback loops.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    RESEARCH PAPER PIPELINE                  │
-│                                                             │
-│  Phase 0: Project Setup ──► Phase 1: Literature Review      │
-│       │                          │                          │
-│       ▼                          ▼                          │
-│  Phase 2: Experiment     Phase 5: Paper Drafting ◄──┐      │
-│       Design                     │                   │      │
-│       │                          ▼                   │      │
-│       ▼                    Phase 6: Self-Review      │      │
-│  Phase 3: Execution &           & Revision ──────────┘      │
-│       Monitoring                 │                          │
-│       │                          ▼                          │
-│       ▼                    Phase 7: Submission               │
-│  Phase 4: Analysis ─────► (feeds back to Phase 2 or 5)     │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────�?
+�?                   RESEARCH PAPER PIPELINE                  �?
+�?                                                            �?
+�? Phase 0: Project Setup ──�?Phase 1: Literature Review      �?
+�?      �?                         �?                         �?
+�?      �?                         �?                         �?
+�? Phase 2: Experiment     Phase 5: Paper Drafting ◄──�?     �?
+�?      Design                     �?                  �?     �?
+�?      �?                         �?                  �?     �?
+�?      �?                   Phase 6: Self-Review      �?     �?
+�? Phase 3: Execution &           & Revision ──────────�?     �?
+�?      Monitoring                 �?                         �?
+�?      �?                         �?                         �?
+�?      �?                   Phase 7: Submission               �?
+�? Phase 4: Analysis ─────�?(feeds back to Phase 2 or 5)     �?
+�?                                                            �?
+└─────────────────────────────────────────────────────────────�?
 ```
 
 ---
@@ -53,17 +53,17 @@ Use this skill when:
 - **Preparing for submission** to a specific conference or workshop
 - **Responding to reviews** with additional experiments or revisions
 - **Converting** a paper between conference formats
-- **Writing non-empirical papers** — theory, survey, benchmark, or position papers (see [Paper Types Beyond Empirical ML](#paper-types-beyond-empirical-ml))
+- **Writing non-empirical papers** �?theory, survey, benchmark, or position papers (see [Paper Types Beyond Empirical ML](#paper-types-beyond-empirical-ml))
 - **Designing human evaluations** for NLP, HCI, or alignment research
-- **Preparing post-acceptance deliverables** — posters, talks, code releases
+- **Preparing post-acceptance deliverables** �?posters, talks, code releases
 
 ## Core Philosophy
 
-1. **Be proactive.** Deliver complete drafts, not questions. Scientists are busy — produce something concrete they can react to, then iterate.
+1. **Be proactive.** Deliver complete drafts, not questions. Scientists are busy �?produce something concrete they can react to, then iterate.
 2. **Never hallucinate citations.** AI-generated citations have ~40% error rate. Always fetch programmatically. Mark unverifiable citations as `[CITATION NEEDED]`.
 3. **Paper is a story, not a collection of experiments.** Every paper needs one clear contribution stated in a single sentence. If you can't do that, the paper isn't ready.
 4. **Experiments serve claims.** Every experiment must explicitly state which claim it supports. Never run experiments that don't connect to the paper's narrative.
-5. **Commit early, commit often.** Every completed experiment batch, every paper draft update — commit with descriptive messages. Git log is the experiment history.
+5. **Commit early, commit often.** Every completed experiment batch, every paper draft update �?commit with descriptive messages. Git log is the experiment history.
 
 ### Proactivity and Collaboration
 
@@ -77,11 +77,11 @@ Use this skill when:
 
 | Section | Draft Autonomously? | Flag With Draft |
 |---------|-------------------|-----------------|
-| Abstract | Yes | "Framed contribution as X — adjust if needed" |
-| Introduction | Yes | "Emphasized problem Y — correct if wrong" |
-| Methods | Yes | "Included details A, B, C — add missing pieces" |
-| Experiments | Yes | "Highlighted results 1, 2, 3 — reorder if needed" |
-| Related Work | Yes | "Cited papers X, Y, Z — add any I missed" |
+| Abstract | Yes | "Framed contribution as X �?adjust if needed" |
+| Introduction | Yes | "Emphasized problem Y �?correct if wrong" |
+| Methods | Yes | "Included details A, B, C �?add missing pieces" |
+| Experiments | Yes | "Highlighted results 1, 2, 3 �?reorder if needed" |
+| Related Work | Yes | "Cited papers X, Y, Z �?add any I missed" |
 
 **Block for input only when**: target venue unclear, multiple contradictory framings, results seem incomplete, explicit request to review first.
 
@@ -101,10 +101,10 @@ find . -name "*.md" -o -name "*.txt" | xargs grep -l -i "result\|conclusion\|fin
 ```
 
 Look for:
-- `README.md` — project overview and claims
-- `results/`, `outputs/`, `experiments/` — existing findings
-- `configs/` — experimental settings
-- `.bib` files — existing citations
+- `README.md` �?project overview and claims
+- `results/`, `outputs/`, `experiments/` �?existing findings
+- `configs/` �?experimental settings
+- `.bib` files �?existing citations
 - Draft documents or notes
 
 ### Step 0.2: Organize the Workspace
@@ -206,7 +206,7 @@ Most papers have 3-10 authors. Establish workflows early:
 |----------|------|-------------|
 | **Overleaf** | Browser-based | Multiple authors editing simultaneously, no git experience |
 | **Git + LaTeX** | `git` with `.gitignore` for aux files | Technical teams, need branch-based review |
-| **Overleaf + Git sync** | Overleaf premium | Best of both — live collab with version history |
+| **Overleaf + Git sync** | Overleaf premium | Best of both �?live collab with version history |
 
 **Section ownership**: Assign each section to one primary author. Others comment but don't edit directly. Prevents merge conflicts and style inconsistency.
 
@@ -246,12 +246,12 @@ find . -name "*.bib"
 
 **Load the `arxiv` skill** for structured paper discovery: `skill_view("arxiv")`. It provides arXiv REST API search, Semantic Scholar citation graphs, author profiles, and BibTeX generation.
 
-Use `web_search` for broad discovery, `web_extract` for fetching specific papers:
+Use `web_extract` for broad discovery, `web_extract` for fetching specific papers:
 
 ```
-# Via web_search:
-web_search("[main technique] + [application domain] site:arxiv.org")
-web_search("[baseline method] comparison ICML NeurIPS 2024")
+# Via web_extract:
+web_extract("[main technique] + [application domain] site:arxiv.org")
+web_extract("[baseline method] comparison ICML NeurIPS 2024")
 
 # Via web_extract (for specific papers):
 web_extract("https://arxiv.org/abs/2303.17651")
@@ -284,19 +284,19 @@ Round 1 (Breadth): 4-6 parallel queries covering different angles
   - "[problem name] state-of-the-art 2024 2025"
   - "[baseline method] comparison"
   - "[alternative approach] vs [your approach]"
-  → Collect papers, extract key concepts and terminology
+  �?Collect papers, extract key concepts and terminology
 
 Round 2 (Depth): Generate follow-up queries from Round 1 learnings
   - New terminology discovered in Round 1 papers
   - Papers cited by the most relevant Round 1 results
   - Contradictory findings that need investigation
-  → Collect papers, identify remaining gaps
+  �?Collect papers, identify remaining gaps
 
 Round 3 (Targeted): Fill specific gaps
   - Missing baselines identified in Rounds 1-2
   - Concurrent work (last 6 months, same problem)
   - Key negative results or failed approaches
-  → Stop when new queries return mostly papers you've already seen
+  �?Stop when new queries return mostly papers you've already seen
 ```
 
 **When to stop**: If a round returns >80% papers already in your collection, the search is saturated. Typically 2-3 rounds suffice. For survey papers, expect 4-5 rounds.
@@ -311,12 +311,12 @@ For each citation, follow the mandatory 5-step process:
 
 ```
 Citation Verification (MANDATORY per citation):
-1. SEARCH → Query Semantic Scholar or Exa MCP with specific keywords
-2. VERIFY → Confirm paper exists in 2+ sources (Semantic Scholar + arXiv/CrossRef)
-3. RETRIEVE → Get BibTeX via DOI content negotiation (programmatically, not from memory)
-4. VALIDATE → Confirm the claim you're citing actually appears in the paper
-5. ADD → Add verified BibTeX to bibliography
-If ANY step fails → mark as [CITATION NEEDED], inform scientist
+1. SEARCH �?Query Semantic Scholar or Exa MCP with specific keywords
+2. VERIFY �?Confirm paper exists in 2+ sources (Semantic Scholar + arXiv/CrossRef)
+3. RETRIEVE �?Get BibTeX via DOI content negotiation (programmatically, not from memory)
+4. VALIDATE �?Confirm the claim you're citing actually appears in the paper
+5. ADD �?Add verified BibTeX to bibliography
+If ANY step fails �?mark as [CITATION NEEDED], inform scientist
 ```
 
 ```python
@@ -389,7 +389,7 @@ Before running anything, specify:
 
 Follow these patterns from successful research pipelines:
 
-**Incremental saving** — save results after each step for crash recovery:
+**Incremental saving** �?save results after each step for crash recovery:
 ```python
 # Save after each problem/task
 result_path = f"results/{task}/{strategy}/result.json"
@@ -400,7 +400,7 @@ with open(result_path, 'w') as f:
     json.dump(result, f, indent=2)
 ```
 
-**Artifact preservation** — save all intermediate outputs:
+**Artifact preservation** �?save all intermediate outputs:
 ```
 results/<experiment>/
   <task>/
@@ -413,7 +413,7 @@ results/<experiment>/
         critic.md
 ```
 
-**Separation of concerns** — keep generation, evaluation, and visualization separate:
+**Separation of concerns** �?keep generation, evaluation, and visualization separate:
 ```
 run_experiment.py              # Core experiment runner
 run_baselines.py               # Baseline comparison
@@ -426,7 +426,7 @@ See [references/experiment-patterns.md](references/experiment-patterns.md) for c
 
 ### Step 2.5: Design Human Evaluation (If Applicable)
 
-Many NLP, HCI, and alignment papers require human evaluation as primary or complementary evidence. Design this before running automated experiments — human eval often has longer lead times (IRB approval, annotator recruitment).
+Many NLP, HCI, and alignment papers require human evaluation as primary or complementary evidence. Design this before running automated experiments �?human eval often has longer lead times (IRB approval, annotator recruitment).
 
 **When human evaluation is needed:**
 - Automated metrics don't capture what you care about (fluency, helpfulness, safety)
@@ -522,10 +522,10 @@ git push
 
 ### Step 3.5: Maintain an Experiment Journal
 
-Git commits track what happened, but not the **exploration tree** — the decisions about what to try next based on what you learned. Maintain a structured experiment journal that captures this tree:
+Git commits track what happened, but not the **exploration tree** �?the decisions about what to try next based on what you learned. Maintain a structured experiment journal that captures this tree:
 
 ```json
-// experiment_journal.jsonl — append one entry per experiment attempt
+// experiment_journal.jsonl �?append one entry per experiment attempt
 {
   "id": "exp_003",
   "parent": "exp_001",
@@ -544,7 +544,7 @@ Git commits track what happened, but not the **exploration tree** — the decisi
 
 **Why a journal, not just git?** Git tracks file changes. The journal tracks the reasoning: why you tried X, what you learned, and what that implies for the next experiment. When writing the paper, this tree is invaluable for the Methods section ("we observed X, which motivated Y") and for honest failure reporting.
 
-**Selecting the best path**: When the journal shows a branching tree (exp_001 → exp_002a, exp_002b, exp_003), identify the path that best supports the paper's claims. Document dead-end branches in the appendix as ablations or negative results.
+**Selecting the best path**: When the journal shows a branching tree (exp_001 �?exp_002a, exp_002b, exp_003), identify the path that best supports the paper's claims. Document dead-end branches in the appendix as ablations or negative results.
 
 **Snapshot code per experiment**: Copy the experiment script after each run:
 ```bash
@@ -609,12 +609,12 @@ When your hypothesis was wrong or results are inconclusive, you have three optio
 |-----------|--------|-----------|
 | Hypothesis wrong but **why** is informative | Frame paper around the analysis of why | NeurIPS, ICML (if analysis is rigorous) |
 | Method doesn't beat baselines but **reveals something new** | Reframe contribution as understanding/analysis | ICLR (values understanding), workshop papers |
-| Clean negative result on popular claim | Write it up — the field needs to know | NeurIPS Datasets & Benchmarks, TMLR, workshops |
-| Results inconclusive, no clear story | Pivot — run different experiments or reframe | Don't force a paper that isn't there |
+| Clean negative result on popular claim | Write it up �?the field needs to know | NeurIPS Datasets & Benchmarks, TMLR, workshops |
+| Results inconclusive, no clear story | Pivot �?run different experiments or reframe | Don't force a paper that isn't there |
 
 **How to write a negative results paper:**
 - Lead with what the community believes and why it matters to test it
-- Describe your rigorous methodology (must be airtight — reviewers will scrutinize harder)
+- Describe your rigorous methodology (must be airtight �?reviewers will scrutinize harder)
 - Present the null result clearly with statistical evidence
 - Analyze **why** the expected result didn't materialize
 - Discuss implications for the field
@@ -626,8 +626,8 @@ When your hypothesis was wrong or results are inconclusive, you have three optio
 **Figures**:
 - Use vector graphics (PDF) for all plots: `plt.savefig('fig.pdf')`
 - Colorblind-safe palettes (Okabe-Ito or Paul Tol)
-- Self-contained captions — reader should understand without main text
-- No title inside figure — the caption serves this function
+- Self-contained captions �?reader should understand without main text
+- No title inside figure �?the caption serves this function
 
 **Tables**:
 - Use `booktabs` LaTeX package
@@ -659,7 +659,7 @@ Baseline & 85.2 & 45ms \\
 
 ### Step 4.6: Write the Experiment Log (Bridge to Writeup)
 
-Before moving to paper writing, create a structured experiment log that bridges results to prose. This is the single most important connective tissue between experiments and the writeup — without it, the writing agent has to re-derive the story from raw result files.
+Before moving to paper writing, create a structured experiment log that bridges results to prose. This is the single most important connective tissue between experiments and the writeup �?without it, the writing agent has to re-derive the story from raw result files.
 
 **Create `experiment_log.md`** with the following structure:
 
@@ -696,7 +696,7 @@ Before moving to paper writing, create a structured experiment log that bridges 
 - [Anything the results raised that the paper should address]
 ```
 
-**Why this matters**: When drafting, the agent (or a delegated sub-agent) can load `experiment_log.md` alongside the LaTeX template and produce a first draft grounded in actual results. Without this bridge, the writing agent must parse raw JSON/CSV files and infer the story — a common source of hallucinated or misreported numbers.
+**Why this matters**: When drafting, the agent (or a delegated sub-agent) can load `experiment_log.md` alongside the LaTeX template and produce a first draft grounded in actual results. Without this bridge, the writing agent must parse raw JSON/CSV files and infer the story �?a common source of hallucinated or misreported numbers.
 
 **Git discipline**: Commit this log alongside the results it describes.
 
@@ -704,7 +704,7 @@ Before moving to paper writing, create a structured experiment log that bridges 
 
 ## Iterative Refinement: Strategy Selection
 
-Any output in this pipeline — paper drafts, experiment scripts, analysis — can be iteratively refined. The autoreason research provides empirical evidence for when each refinement strategy works and when it fails. Use this section to choose the right approach.
+Any output in this pipeline �?paper drafts, experiment scripts, analysis �?can be iteratively refined. The autoreason research provides empirical evidence for when each refinement strategy works and when it fails. Use this section to choose the right approach.
 
 ### Quick Decision Table
 
@@ -724,13 +724,13 @@ Any output in this pipeline — paper drafts, experiment scripts, analysis — c
 **Core insight**: Autoreason's value depends on the gap between a model's generation capability and its self-evaluation capability.
 
 ```
-Model Tier        │ Generation │ Self-Eval │ Gap    │ Autoreason Value
+Model Tier        �?Generation �?Self-Eval �?Gap    �?Autoreason Value
 ──────────────────┼────────────┼───────────┼────────┼─────────────────
-Weak (Llama 8B)   │ Poor       │ Poor      │ Small  │ None — can't generate diverse candidates
-Mid (Haiku 3.5)   │ Decent     │ Poor      │ LARGE  │ MAXIMUM — 42/42 perfect Borda
-Mid (Gemini Flash)│ Decent     │ Moderate  │ Large  │ High — wins 2/3
-Strong (Sonnet 4) │ Good       │ Decent    │ Medium │ Moderate — wins 3/5
-Frontier (S4.6)   │ Excellent  │ Good      │ Small  │ Only with constraints
+Weak (Llama 8B)   �?Poor       �?Poor      �?Small  �?None �?can't generate diverse candidates
+Mid (Haiku 3.5)   �?Decent     �?Poor      �?LARGE  �?MAXIMUM �?42/42 perfect Borda
+Mid (Gemini Flash)�?Decent     �?Moderate  �?Large  �?High �?wins 2/3
+Strong (Sonnet 4) �?Good       �?Decent    �?Medium �?Moderate �?wins 3/5
+Frontier (S4.6)   �?Excellent  �?Good      �?Small  �?Only with constraints
 ```
 
 This gap is structural, not temporary. As costs drop, today's frontier becomes tomorrow's mid-tier. The sweet spot moves but never disappears.
@@ -739,11 +739,11 @@ This gap is structural, not temporary. As costs drop, today's frontier becomes t
 
 Each pass produces three candidates from fresh, isolated agents:
 
-1. **Critic** → finds problems in incumbent A (no fixes)
-2. **Author B** → revises A based on critique
-3. **Synthesizer** → merges A and B (randomized labels)
-4. **Judge Panel** → 3 blind CoT judges rank A, B, AB via Borda count
-5. **Convergence** → A wins k=2 consecutive passes → done
+1. **Critic** �?finds problems in incumbent A (no fixes)
+2. **Author B** �?revises A based on critique
+3. **Synthesizer** �?merges A and B (randomized labels)
+4. **Judge Panel** �?3 blind CoT judges rank A, B, AB via Borda count
+5. **Convergence** �?A wins k=2 consecutive passes �?done
 
 **Key parameters:**
 - k=2 convergence (k=1 premature, k=3 too expensive, no quality gain)
@@ -756,7 +756,7 @@ Each pass produces three candidates from fresh, isolated agents:
 
 When refining the paper itself through autoreason:
 - **Provide ground truth to the critic**: actual experimental data, result JSONs, statistical outputs. Without this, models hallucinate fabricated ablation studies and fake confidence intervals.
-- **Use 3 working judges minimum**: A broken judge parser doesn't add noise — it prevents equilibrium entirely.
+- **Use 3 working judges minimum**: A broken judge parser doesn't add noise �?it prevents equilibrium entirely.
 - **Scope constrain the revision**: "Address these specific weaknesses" not "improve the paper."
 
 ### Failure Modes
@@ -792,7 +792,7 @@ A paper project with 50+ experiment files, multiple result directories, and exte
 | Revision pass | Full paper draft, specific reviewer concerns | Everything else |
 
 **Principles:**
-- **`experiment_log.md` is the primary context bridge** — it summarizes everything needed for writing without loading raw data files (see Step 4.6)
+- **`experiment_log.md` is the primary context bridge** �?it summarizes everything needed for writing without loading raw data files (see Step 4.6)
 - **Load one section's context at a time** when delegating. A sub-agent drafting Methods doesn't need the literature review notes.
 - **Summarize, don't include raw files.** For a 200-line result JSON, load a 10-line summary table. For a 50-page related paper, load the 5-sentence abstract + your 2-line note about its relevance.
 - **For very large projects**: Create a `context/` directory with pre-compressed summaries:
@@ -806,7 +806,7 @@ A paper project with 50+ experiment files, multiple result directories, and exte
 
 ### The Narrative Principle
 
-**The single most critical insight**: Your paper is not a collection of experiments — it's a story with one clear contribution supported by evidence.
+**The single most critical insight**: Your paper is not a collection of experiments �?it's a story with one clear contribution supported by evidence.
 
 Every successful ML paper centers on what Neel Nanda calls "the narrative": a short, rigorous, evidence-based technical story with a takeaway readers care about.
 
@@ -835,8 +835,8 @@ This skill synthesizes writing philosophy from researchers who have published ex
 | **Andrej Karpathy** | Single contribution focus | Various lectures |
 
 **For deeper dives into any of these, see:**
-- [references/writing-guide.md](references/writing-guide.md) — Full explanations with examples
-- [references/sources.md](references/sources.md) — Complete bibliography
+- [references/writing-guide.md](references/writing-guide.md) �?Full explanations with examples
+- [references/sources.md](references/sources.md) �?Complete bibliography
 
 ### Time Allocation
 
@@ -846,7 +846,7 @@ Spend approximately **equal time** on each of:
 3. The figures
 4. Everything else combined
 
-**Why?** Most reviewers form judgments before reaching your methods. Readers encounter your paper as: title → abstract → introduction → figures → maybe the rest.
+**Why?** Most reviewers form judgments before reaching your methods. Readers encounter your paper as: title �?abstract �?introduction �?figures �?maybe the rest.
 
 ### Writing Workflow
 
@@ -870,10 +870,10 @@ Paper Writing Checklist:
 
 When drafting with an AI agent, use a **two-pass** approach (proven effective in SakanaAI's AI-Scientist pipeline):
 
-**Pass 1 — Write + immediate refine per section:**
+**Pass 1 �?Write + immediate refine per section:**
 For each section, write a complete draft, then immediately refine it in the same context. This catches local issues (clarity, flow, completeness) while the section is fresh.
 
-**Pass 2 — Global refinement with full-paper context:**
+**Pass 2 �?Global refinement with full-paper context:**
 After all sections are drafted, revisit each section with awareness of the complete paper. This catches cross-section issues: redundancy, inconsistent terminology, narrative flow, and gaps where one section promises something another doesn't deliver.
 
 ```
@@ -941,7 +941,7 @@ From Sebastian Farquhar (DeepMind):
 
 ### Step 5.2: Figure 1
 
-Figure 1 is the second thing most readers look at (after abstract). Draft it before writing the introduction — it forces you to clarify the core idea.
+Figure 1 is the second thing most readers look at (after abstract). Draft it before writing the introduction �?it forces you to clarify the core idea.
 
 | Figure 1 Type | When to Use | Example |
 |---------------|-------------|---------|
@@ -950,7 +950,7 @@ Figure 1 is the second thing most readers look at (after abstract). Draft it bef
 | **Problem illustration** | The problem is unintuitive | Before/after showing failure mode you fix |
 | **Conceptual diagram** | Abstract contribution needs visual grounding | 2x2 matrix of method properties |
 
-**Rules**: Figure 1 must be understandable without reading any text. The caption alone should communicate the core idea. Use color purposefully — don't just decorate.
+**Rules**: Figure 1 must be understandable without reading any text. The caption alone should communicate the core idea. Use color purposefully �?don't just decorate.
 
 ### Step 5.3: Introduction (1-1.5 pages max)
 
@@ -983,7 +983,7 @@ Requirements:
 
 ### Step 5.6: Related Work
 
-Organize methodologically, not paper-by-paper. Cite generously — reviewers likely authored relevant papers.
+Organize methodologically, not paper-by-paper. Cite generously �?reviewers likely authored relevant papers.
 
 ### Step 5.7: Limitations (REQUIRED)
 
@@ -1023,7 +1023,7 @@ Appendices are unlimited at all major venues and are essential for reproducibili
 | **Additional Figures** | Per-task breakdowns, trajectory visualizations, failure case examples |
 
 **Rules**:
-- The main paper must be self-contained — reviewers are not required to read appendices
+- The main paper must be self-contained �?reviewers are not required to read appendices
 - Never put critical evidence only in the appendix
 - Cross-reference: "Full results in Table 5 (Appendix B)" not just "see appendix"
 - Use `\appendix` command, then `\section{A: Proofs}` etc.
@@ -1034,18 +1034,18 @@ When over the page limit:
 
 | Cut Strategy | Saves | Risk |
 |-------------|-------|------|
-| Move proofs to appendix | 0.5-2 pages | Low — standard practice |
-| Condense related work | 0.5-1 page | Medium — may miss key citations |
-| Combine tables with subfigures | 0.25-0.5 page | Low — often improves readability |
+| Move proofs to appendix | 0.5-2 pages | Low �?standard practice |
+| Condense related work | 0.5-1 page | Medium �?may miss key citations |
+| Combine tables with subfigures | 0.25-0.5 page | Low �?often improves readability |
 | Use `\vspace{-Xpt}` sparingly | 0.1-0.3 page | Low if subtle, high if obvious |
-| Remove qualitative examples | 0.5-1 page | Medium — reviewers like examples |
-| Reduce figure sizes | 0.25-0.5 page | High — figures must remain readable |
+| Remove qualitative examples | 0.5-1 page | Medium �?reviewers like examples |
+| Reduce figure sizes | 0.25-0.5 page | High �?figures must remain readable |
 
 **Do NOT**: reduce font size, change margins, remove required sections (limitations, broader impact), or use `\small`/`\footnotesize` for main text.
 
 ### Step 5.10: Ethics & Broader Impact Statement
 
-Most venues now require or strongly encourage an ethics/broader impact statement. This is not boilerplate — reviewers read it and can flag ethics concerns that trigger desk rejection.
+Most venues now require or strongly encourage an ethics/broader impact statement. This is not boilerplate �?reviewers read it and can flag ethics concerns that trigger desk rejection.
 
 **What to include:**
 
@@ -1078,7 +1078,7 @@ require [specific additional work].
 ```
 
 **Common mistakes:**
-- Writing "we foresee no negative impacts" (almost never true — reviewers distrust this)
+- Writing "we foresee no negative impacts" (almost never true �?reviewers distrust this)
 - Being vague: "this could be misused" without specifying how
 - Ignoring compute costs for large-scale work
 - Forgetting to disclose LLM use at venues that require it
@@ -1100,7 +1100,7 @@ print(f"Energy: {energy_kwh:.0f} kWh, Carbon: {carbon_kg:.0f} kg CO2eq")
 
 If your paper introduces a **new dataset** or **releases a model**, include structured documentation. Reviewers increasingly expect this, and NeurIPS Datasets & Benchmarks track requires it.
 
-**Datasheets for Datasets** (Gebru et al., 2021) — include in appendix:
+**Datasheets for Datasets** (Gebru et al., 2021) �?include in appendix:
 
 ```
 Dataset Documentation (Appendix):
@@ -1114,7 +1114,7 @@ Dataset Documentation (Appendix):
   Potential for harm? Known biases?
 ```
 
-**Model Cards** (Mitchell et al., 2019) — include in appendix for model releases:
+**Model Cards** (Mitchell et al., 2019) �?include in appendix for model releases:
 
 ```
 Model Card (Appendix):
@@ -1134,7 +1134,7 @@ Model Card (Appendix):
 | Subject-verb proximity | Keep subject and verb close |
 | Stress position | Place emphasis at sentence ends |
 | Topic position | Put context first, new info after |
-| Old before new | Familiar info → unfamiliar info |
+| Old before new | Familiar info �?unfamiliar info |
 | One unit, one function | Each paragraph makes one point |
 | Action in verb | Use verbs, not nominalizations |
 | Context before new | Set stage before presenting |
@@ -1179,7 +1179,7 @@ latexmk -pdf main.tex
 # Or manual: pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
 ```
 
-If the unmodified template doesn't compile, fix that first (usually missing TeX packages — install via `tlmgr install <package>`).
+If the unmodified template doesn't compile, fix that first (usually missing TeX packages �?install via `tlmgr install <package>`).
 
 **Step 3: Keep Template Content as Reference**
 
@@ -1202,7 +1202,7 @@ Don't immediately delete example content. Comment it out and use as formatting r
 
 **Step 4: Replace Content Section by Section**
 
-Work through systematically: title/authors → abstract → introduction → methods → experiments → related work → conclusion → references → appendix. Compile after each section.
+Work through systematically: title/authors �?abstract �?introduction �?methods �?experiments �?related work �?conclusion �?references �?appendix. Compile after each section.
 
 **Step 5: Use Template Macros**
 
@@ -1240,7 +1240,7 @@ Templates in `templates/` directory. See [templates/README.md](templates/README.
 
 ### Tables and Figures
 
-**Tables** — use `booktabs` for professional formatting:
+**Tables** �?use `booktabs` for professional formatting:
 
 ```latex
 \usepackage{booktabs}
@@ -1261,16 +1261,16 @@ Rules:
 - Consistent decimal precision
 
 **Figures**:
-- **Vector graphics** (PDF, EPS) for all plots and diagrams — `plt.savefig('fig.pdf')`
+- **Vector graphics** (PDF, EPS) for all plots and diagrams �?`plt.savefig('fig.pdf')`
 - **Raster** (PNG 600 DPI) only for photographs
 - **Colorblind-safe palettes** (Okabe-Ito or Paul Tol)
 - Verify **grayscale readability** (8% of men have color vision deficiency)
-- **No title inside figure** — the caption serves this function
-- **Self-contained captions** — reader should understand without main text
+- **No title inside figure** �?the caption serves this function
+- **Self-contained captions** �?reader should understand without main text
 
 ### Conference Resubmission
 
-For converting between venues, see Phase 7 (Submission Preparation) — it covers the full conversion workflow, page-change table, and post-rejection guidance.
+For converting between venues, see Phase 7 (Submission Preparation) �?it covers the full conversion workflow, page-change table, and post-rejection guidance.
 
 ### Professional LaTeX Preamble
 
@@ -1281,12 +1281,12 @@ Add these packages to any paper for professional quality. They are compatible wi
 
 % Typography
 \usepackage{microtype}              % Microtypographic improvements (protrusion, expansion)
-                                     % Makes text noticeably more polished — always include
+                                     % Makes text noticeably more polished �?always include
 
 % Tables
 \usepackage{booktabs}               % Professional table rules (\toprule, \midrule, \bottomrule)
 \usepackage{siunitx}                % Consistent number formatting, decimal alignment
-                                     % Usage: \num{12345} → 12,345; \SI{3.5}{GHz} → 3.5 GHz
+                                     % Usage: \num{12345} �?12,345; \SI{3.5}{GHz} �?3.5 GHz
                                      % Table alignment: S column type for decimal-aligned numbers
 
 % Figures
@@ -1301,7 +1301,7 @@ Add these packages to any paper for professional quality. They are compatible wi
                                      % Alternative: \usepackage{algorithmicx} if template bundles it
 
 % Cross-references
-\usepackage{cleveref}               % Smart references: \cref{fig:x} → "Figure 1"
+\usepackage{cleveref}               % Smart references: \cref{fig:x} �?"Figure 1"
                                      % MUST be loaded AFTER hyperref
                                      % Handles: figures, tables, sections, equations, algorithms
 
@@ -1323,7 +1323,7 @@ Add these packages to any paper for professional quality. They are compatible wi
 
 **Notes:**
 - `microtype` is the single highest-impact package for visual quality. It adjusts character spacing at a sub-pixel level. Always include it.
-- `siunitx` handles decimal alignment in tables via the `S` column type — eliminates manual spacing.
+- `siunitx` handles decimal alignment in tables via the `S` column type �?eliminates manual spacing.
 - `cleveref` must be loaded **after** `hyperref`. Most conference .sty files load hyperref, so put cleveref last.
 - Check if the conference template already loads any of these (especially `algorithm`, `amsmath`, `graphicx`). Don't double-load.
 
@@ -1371,7 +1371,7 @@ Standard pattern for side-by-side figures:
 \end{figure}
 ```
 
-Use `\cref{fig:results}` → "Figure 1", `\cref{fig:results-a}` → "Figure 1a".
+Use `\cref{fig:results}` �?"Figure 1", `\cref{fig:results-a}` �?"Figure 1a".
 
 ### Pseudocode with algorithm2e
 
@@ -1480,7 +1480,7 @@ representation $z$, which the decoder reconstructs.}
 
 ### latexdiff for Revision Tracking
 
-Essential for rebuttals — generates a marked-up PDF showing changes between versions:
+Essential for rebuttals �?generates a marked-up PDF showing changes between versions:
 
 ```bash
 # Install
@@ -1495,7 +1495,7 @@ pdflatex paper_diff.tex
 latexdiff --flatten paper_v1.tex paper_v2.tex > paper_diff.tex
 ```
 
-This produces a PDF with deletions in red strikethrough and additions in blue — standard format for rebuttal supplements.
+This produces a PDF with deletions in red strikethrough and additions in blue �?standard format for rebuttal supplements.
 
 ### SciencePlots for matplotlib
 
@@ -1524,9 +1524,9 @@ with plt.style.context(['science', 'no-latex']):
 ```
 
 **Standard figure sizes** (two-column format):
-- Single column: `figsize=(3.5, 2.5)` — fits in one column
-- Double column: `figsize=(7.0, 3.0)` — spans both columns
-- Square: `figsize=(3.5, 3.5)` — for heatmaps, confusion matrices
+- Single column: `figsize=(3.5, 2.5)` �?fits in one column
+- Double column: `figsize=(7.0, 3.0)` �?spans both columns
+- Square: `figsize=(3.5, 3.5)` �?for heatmaps, confusion matrices
 
 ---
 
@@ -1540,7 +1540,7 @@ Generate reviews from multiple perspectives. The key insight from automated rese
 
 **Step 1: Generate N independent reviews** (N=3-5)
 
-Use different models or temperature settings. Each reviewer sees only the paper, not other reviews. **Default to negative bias** — LLMs have well-documented positivity bias in evaluation.
+Use different models or temperature settings. Each reviewer sees only the paper, not other reviews. **Default to negative bias** �?LLMs have well-documented positivity bias in evaluation.
 
 ```
 You are an expert reviewer for [VENUE]. You are critical and thorough.
@@ -1630,7 +1630,7 @@ Claim Verification Protocol:
 4. Flag any claim without a traceable source as [VERIFY]
 ```
 
-For agent-based workflows: delegate verification to a **fresh sub-agent** that receives only the paper text and the raw result files. The fresh context prevents confirmation bias — the verifier doesn't "remember" what the results were supposed to be.
+For agent-based workflows: delegate verification to a **fresh sub-agent** that receives only the paper text and the raw result files. The fresh context prevents confirmation bias �?the verifier doesn't "remember" what the results were supposed to be.
 
 ### Step 6.2: Prioritize Feedback
 
@@ -1638,7 +1638,7 @@ After collecting reviews, categorize:
 
 | Priority | Action |
 |----------|--------|
-| **Critical** (technical flaw, missing baseline) | Must fix. May require new experiments → back to Phase 2 |
+| **Critical** (technical flaw, missing baseline) | Must fix. May require new experiments �?back to Phase 2 |
 | **High** (clarity issue, missing ablation) | Should fix in this revision |
 | **Medium** (minor writing issues, extra experiments) | Fix if time allows |
 | **Low** (style preferences, tangential suggestions) | Note for future work |
@@ -1666,9 +1666,9 @@ Method X in Table 3 (revised). Our method outperforms X by 3.2pp on [metric]
 ```
 
 **Rules**:
-- Address every concern — reviewers notice if you skip one
+- Address every concern �?reviewers notice if you skip one
 - Lead with the strongest responses
-- Be concise and direct — reviewers read dozens of rebuttals
+- Be concise and direct �?reviewers read dozens of rebuttals
 - Include new results if you ran experiments during the rebuttal period
 - Never be defensive or dismissive, even of weak criticisms
 - Use `latexdiff` to generate a marked-up PDF showing changes (see Professional LaTeX Tooling section)
@@ -1696,7 +1696,7 @@ paper/
 
 ### Step 7.1: Conference Checklist
 
-Every venue has mandatory checklists. Complete them carefully — incomplete checklists can result in desk rejection.
+Every venue has mandatory checklists. Complete them carefully �?incomplete checklists can result in desk rejection.
 
 See [references/checklists.md](references/checklists.md) for:
 - NeurIPS 16-item paper checklist
@@ -1804,10 +1804,10 @@ ls -la main.pdf
 ```
 
 **If compilation fails**: Parse the `.log` file for the first error. Common fixes:
-- "Undefined control sequence" → missing package or typo in command name
-- "Missing $ inserted" → math symbol outside math mode
-- "File not found" → wrong figure path or missing .sty file
-- "Citation undefined" → .bib entry missing or bibtex not run
+- "Undefined control sequence" �?missing package or typo in command name
+- "Missing $ inserted" �?math symbol outside math mode
+- "File not found" �?wrong figure path or missing .sty file
+- "Citation undefined" �?.bib entry missing or bibtex not run
 
 ### Step 7.6: Conference-Specific Requirements
 
@@ -1817,7 +1817,7 @@ ls -la main.pdf
 | **ICML** | Broader Impact Statement (after conclusion, doesn't count toward limit) |
 | **ICLR** | LLM disclosure required, reciprocal reviewing agreement |
 | **ACL** | Mandatory Limitations section, Responsible NLP checklist |
-| **AAAI** | Strict style file — no modifications whatsoever |
+| **AAAI** | Strict style file �?no modifications whatsoever |
 | **COLM** | Frame contribution for language model community |
 
 ### Step 7.7: Conference Resubmission & Format Conversion
@@ -1836,13 +1836,13 @@ cp -r templates/icml2026/ new_submission/
 # 5. Update references
 ```
 
-| From → To | Page Change | Key Adjustments |
+| From �?To | Page Change | Key Adjustments |
 |-----------|-------------|-----------------|
-| NeurIPS → ICML | 9 → 8 | Cut 1 page, add Broader Impact |
-| ICML → ICLR | 8 → 9 | Expand experiments, add LLM disclosure |
-| NeurIPS → ACL | 9 → 8 | Restructure for NLP conventions, add Limitations |
-| ICLR → AAAI | 9 → 7 | Significant cuts, strict style adherence |
-| Any → COLM | varies → 9 | Reframe for language model focus |
+| NeurIPS �?ICML | 9 �?8 | Cut 1 page, add Broader Impact |
+| ICML �?ICLR | 8 �?9 | Expand experiments, add LLM disclosure |
+| NeurIPS �?ACL | 9 �?8 | Restructure for NLP conventions, add Limitations |
+| ICLR �?AAAI | 9 �?7 | Significant cuts, strict style adherence |
+| Any �?COLM | varies �?9 | Reframe for language model focus |
 
 When cutting pages: move proofs to appendix, condense related work, combine tables, use subfigures.
 When expanding: add ablations, expand limitations, include additional baselines, add qualitative examples.
@@ -1859,7 +1859,7 @@ Camera-Ready Checklist:
 - [ ] Add Acknowledgments section (funding, compute grants, helpful reviewers)
 - [ ] Add public code/data URL (real GitHub, not anonymous)
 - [ ] Address any mandatory revisions from meta-reviewer
-- [ ] Switch template to camera-ready mode (if applicable — e.g., AAAI \anon → \camera)
+- [ ] Switch template to camera-ready mode (if applicable �?e.g., AAAI \anon �?\camera)
 - [ ] Add copyright notice if required by venue
 - [ ] Update any "anonymous" placeholders in text
 - [ ] Verify final PDF compiles cleanly
@@ -1878,8 +1878,8 @@ Posting to arXiv is standard practice in ML but has important timing and anonymi
 | Submitting to double-blind venue (NeurIPS, ICML, ACL) | Post to arXiv **after** submission deadline, not before. Posting before can technically violate anonymity policies, though enforcement varies. |
 | Submitting to ICLR | ICLR explicitly allows arXiv posting before submission. But don't put author names in the submission itself. |
 | Paper already on arXiv, submitting to new venue | Acceptable at most venues. Do NOT update arXiv version during review with changes that reference reviews. |
-| Workshop paper | arXiv is fine at any time — workshops are typically not double-blind. |
-| Want to establish priority | Post immediately if scooping is a concern — but accept the anonymity tradeoff. |
+| Workshop paper | arXiv is fine at any time �?workshops are typically not double-blind. |
+| Want to establish priority | Post immediately if scooping is a concern �?but accept the anonymity tradeoff. |
 
 **arXiv category selection** (ML/AI papers):
 
@@ -1967,7 +1967,7 @@ To reproduce Figure 2: `python scripts/make_figure2.py`
 ```bash
 # Use Anonymous GitHub for double-blind review
 # https://anonymous.4open.science/
-# Upload your repo → get an anonymous URL → put in paper
+# Upload your repo �?get an anonymous URL �?put in paper
 ```
 
 ---
@@ -1985,7 +1985,7 @@ Most conferences require a poster session. Poster design principles:
 | **Size** | Check venue requirements (typically 24"x36" or A0 portrait/landscape) |
 | **Content** | Title, authors, 1-sentence contribution, method figure, 2-3 key results, conclusion |
 | **Flow** | Top-left to bottom-right (Z-pattern) or columnar |
-| **Text** | Title readable at 3m, body at 1m. No full paragraphs — bullet points only. |
+| **Text** | Title readable at 3m, body at 1m. No full paragraphs �?bullet points only. |
 | **Figures** | Reuse paper figures at higher resolution. Enlarge key result. |
 
 **Tools**: LaTeX (`beamerposter` package), PowerPoint/Keynote, Figma, Canva.
@@ -2000,11 +2000,11 @@ If awarded an oral or spotlight presentation:
 |-----------|----------|---------|
 | **Spotlight** | 5 min | Problem, approach, one key result. Rehearse to exactly 5 minutes. |
 | **Oral** | 15-20 min | Full story: problem, approach, key results, ablations, limitations. |
-| **Workshop talk** | 10-15 min | Adapt based on workshop audience — may need more background. |
+| **Workshop talk** | 10-15 min | Adapt based on workshop audience �?may need more background. |
 
 **Slide design rules:**
 - One idea per slide
-- Minimize text — speak the details, don't project them
+- Minimize text �?speak the details, don't project them
 - Animate key figures to build understanding step-by-step
 - Include a "takeaway" slide at the end (single sentence contribution)
 - Prepare backup slides for anticipated questions
@@ -2052,7 +2052,7 @@ ACL venues have distinct submission types:
 | **Short paper** | 4 | Focused contribution: one clear point with evidence |
 | **Findings** | 8 | Solid work that narrowly missed main conference |
 
-**Short paper strategy**: Pick ONE claim and support it thoroughly. Don't try to compress a long paper into 4 pages — write a different, more focused paper.
+**Short paper strategy**: Pick ONE claim and support it thoroughly. Don't try to compress a long paper into 4 pages �?write a different, more focused paper.
 
 ---
 
@@ -2062,10 +2062,10 @@ The main pipeline above targets empirical ML papers. Other paper types require d
 
 ### Theory Papers
 
-**Structure**: Introduction → Preliminaries (definitions, notation) → Main Results (theorems) → Proof Sketches → Discussion → Full Proofs (appendix)
+**Structure**: Introduction �?Preliminaries (definitions, notation) �?Main Results (theorems) �?Proof Sketches �?Discussion �?Full Proofs (appendix)
 
 **Key differences from empirical papers:**
-- Contribution is a theorem, bound, or impossibility result — not experimental numbers
+- Contribution is a theorem, bound, or impossibility result �?not experimental numbers
 - Methods section replaced by "Preliminaries" and "Main Results"
 - Proofs are the evidence, not experiments (though empirical validation of theory is welcome)
 - Proof sketches in main text, full proofs in appendix is standard practice
@@ -2080,10 +2080,10 @@ The main pipeline above targets empirical ML papers. Other paper types require d
 
 ### Survey / Tutorial Papers
 
-**Structure**: Introduction → Taxonomy / Organization → Detailed Coverage → Open Problems → Conclusion
+**Structure**: Introduction �?Taxonomy / Organization �?Detailed Coverage �?Open Problems �?Conclusion
 
 **Key differences:**
-- Contribution is the organization, synthesis, and identification of open problems — not new methods
+- Contribution is the organization, synthesis, and identification of open problems �?not new methods
 - Must be comprehensive within scope (reviewers will check for missing references)
 - Requires a clear taxonomy or organizational framework
 - Value comes from connections between works that individual papers don't make
@@ -2091,10 +2091,10 @@ The main pipeline above targets empirical ML papers. Other paper types require d
 
 ### Benchmark Papers
 
-**Structure**: Introduction → Task Definition → Dataset Construction → Baseline Evaluation → Analysis → Intended Use & Limitations
+**Structure**: Introduction �?Task Definition �?Dataset Construction �?Baseline Evaluation �?Analysis �?Intended Use & Limitations
 
 **Key differences:**
-- Contribution is the benchmark itself — it must fill a genuine evaluation gap
+- Contribution is the benchmark itself �?it must fill a genuine evaluation gap
 - Dataset documentation is mandatory, not optional (see Datasheets, Step 5.11)
 - Must demonstrate the benchmark is challenging (baselines don't saturate it)
 - Must demonstrate the benchmark measures what you claim it measures (construct validity)
@@ -2102,7 +2102,7 @@ The main pipeline above targets empirical ML papers. Other paper types require d
 
 ### Position Papers
 
-**Structure**: Introduction → Background → Thesis / Argument → Supporting Evidence → Counterarguments → Implications
+**Structure**: Introduction �?Background �?Thesis / Argument �?Supporting Evidence �?Counterarguments �?Implications
 
 **Key differences:**
 - Contribution is an argument, not a result
@@ -2129,7 +2129,7 @@ Compose this skill with other Hermes skills for specific phases:
 | **diagramming** | Phase 4-5: creating Excalidraw-based figures and architecture diagrams | `skill_view("diagramming")` |
 | **data-science** | Phase 4 (Analysis): Jupyter live kernel for interactive analysis and visualization | `skill_view("data-science")` |
 
-**This skill supersedes `ml-paper-writing`** — it contains all of ml-paper-writing's content plus the full experiment/analysis pipeline and autoreason methodology.
+**This skill supersedes `ml-paper-writing`** �?it contains all of ml-paper-writing's content plus the full experiment/analysis pipeline and autoreason methodology.
 
 ### Hermes Tools Reference
 
@@ -2139,9 +2139,9 @@ Compose this skill with other Hermes skills for specific phases:
 | **`process`** | Background experiment management: `process("start", ...)`, `process("poll", pid)`, `process("log", pid)`, `process("kill", pid)` |
 | **`execute_code`** | Run Python for citation verification, statistical analysis, data aggregation. Has tool access via RPC. |
 | **`read_file`** / **`write_file`** / **`patch`** | Paper editing, experiment scripts, result files. Use `patch` for targeted edits to large .tex files. |
-| **`web_search`** | Literature discovery: `web_search("transformer attention mechanism 2024")` |
+| **`web_extract`** | Literature discovery: `web_extract("transformer attention mechanism 2024")` |
 | **`web_extract`** | Fetch paper content, verify citations: `web_extract("https://arxiv.org/abs/2303.17651")` |
-| **`delegate_task`** | **Parallel section drafting** — spawn isolated subagents for each section. Also for concurrent citation verification. |
+| **`delegate_task`** | **Parallel section drafting** �?spawn isolated subagents for each section. Also for concurrent citation verification. |
 | **`todo`** | Primary state tracker across sessions. Update after every phase transition. |
 | **`memory`** | Persist key decisions across sessions: contribution framing, venue choice, reviewer feedback. |
 | **`cronjob`** | Schedule experiment monitoring, deadline countdowns, automated arXiv checks. |
@@ -2153,11 +2153,11 @@ Compose this skill with other Hermes skills for specific phases:
 **Experiment monitoring** (most common):
 ```
 terminal("ps aux | grep <pattern>")
-→ terminal("tail -30 <logfile>")
-→ terminal("ls results/")
-→ execute_code("analyze results JSON, compute metrics")
-→ terminal("git add -A && git commit -m '<descriptive message>' && git push")
-→ send_message("Experiment complete: <summary>")
+�?terminal("tail -30 <logfile>")
+�?terminal("ls results/")
+�?execute_code("analyze results JSON, compute metrics")
+�?terminal("git add -A && git commit -m '<descriptive message>' && git push")
+�?send_message("Experiment complete: <summary>")
 ```
 
 **Parallel section drafting** (using delegation):
@@ -2166,14 +2166,14 @@ delegate_task("Draft the Methods section based on these experiment scripts and c
   Include: pseudocode, all hyperparameters, architectural details sufficient for 
   reproduction. Write in LaTeX using the neurips2025 template conventions.")
 
-delegate_task("Draft the Related Work section. Use web_search and web_extract to 
+delegate_task("Draft the Related Work section. Use web_extract and web_extract to 
   find papers. Verify every citation via Semantic Scholar. Group by methodology.")
 
 delegate_task("Draft the Experiments section. Read all result files in results/. 
   State which claim each experiment supports. Include error bars and significance.")
 ```
 
-Each delegate runs as a **fresh subagent** with no shared context — provide all necessary information in the prompt. Collect outputs and integrate.
+Each delegate runs as a **fresh subagent** with no shared context �?provide all necessary information in the prompt. Collect outputs and integrate.
 
 **Citation verification** (using execute_code):
 ```python
@@ -2193,18 +2193,18 @@ for paper in results:
 
 ### State Management with `memory` and `todo`
 
-**`memory` tool** — persist key decisions (bounded: ~2200 chars for MEMORY.md):
+**`memory` tool** �?persist key decisions (bounded: ~2200 chars for MEMORY.md):
 
 ```
 memory("add", "Paper: autoreason. Venue: NeurIPS 2025 (9 pages). 
   Contribution: structured refinement works when generation-evaluation gap is wide.
   Key results: Haiku 42/42, Sonnet 3/5, S4.6 constrained 2/3.
-  Status: Phase 5 — drafting Methods section.")
+  Status: Phase 5 �?drafting Methods section.")
 ```
 
 Update memory after major decisions or phase transitions. This persists across sessions.
 
-**`todo` tool** — track granular progress:
+**`todo` tool** �?track granular progress:
 
 ```
 todo("add", "Design constrained task experiments for Sonnet 4.6")
@@ -2250,7 +2250,7 @@ cronjob("create", {
   "schedule": "0 9 * * *",  # Daily at 9am
   "prompt": "NeurIPS 2025 deadline: May 22. Today is {date}. 
     Days remaining: {compute}. 
-    Check todo list — are we on track? 
+    Check todo list �?are we on track? 
     If <7 days: warn user about remaining tasks."
 })
 ```
@@ -2264,11 +2264,11 @@ cronjob("create", {
 - Deadline approaching with incomplete tasks
 
 **When NOT to notify:**
-- Experiment still running, no new results → `[SILENT]`
-- Routine monitoring with no changes → `[SILENT]`
+- Experiment still running, no new results �?`[SILENT]`
+- Routine monitoring with no changes �?`[SILENT]`
 - Intermediate steps that don't need attention
 
-**Report format** — always include structured data:
+**Report format** �?always include structured data:
 ```
 ## Experiment: <name>
 Status: Complete / Running / Failed
@@ -2311,12 +2311,12 @@ Understanding what reviewers look for helps focus effort:
 | **Originality** | New insights (doesn't require new method) |
 
 **Scoring (NeurIPS 6-point scale):**
-- 6: Strong Accept — groundbreaking, flawless
-- 5: Accept — technically solid, high impact
-- 4: Borderline Accept — solid, limited evaluation
-- 3: Borderline Reject — weaknesses outweigh
-- 2: Reject — technical flaws
-- 1: Strong Reject — known results or ethics issues
+- 6: Strong Accept �?groundbreaking, flawless
+- 5: Accept �?technically solid, high impact
+- 4: Borderline Accept �?solid, limited evaluation
+- 3: Borderline Reject �?weaknesses outweigh
+- 2: Reject �?technical flaws
+- 1: Strong Reject �?known results or ethics issues
 
 See [references/reviewer-guidelines.md](references/reviewer-guidelines.md) for detailed guidelines, common concerns, and rebuttal strategies.
 

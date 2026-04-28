@@ -58,7 +58,7 @@ metadata:
     tags: [Category, Subcategory, Keywords]
     related_skills: [other-skill-name]
     requires_toolsets: [web]            # Optional — only show when these toolsets are active
-    requires_tools: [web_search]        # Optional — only show when these tools are available
+    requires_tools: [web_extract]        # Optional — only show when these tools are available
     fallback_for_toolsets: [browser]    # Optional — hide when these toolsets are active
     fallback_for_tools: [browser_navigate]  # Optional — hide when these tools exist
     config:                              # Optional — config.yaml settings the skill needs
@@ -113,7 +113,7 @@ Skills can declare dependencies on specific tools or toolsets. This controls whe
 metadata:
   hermes:
     requires_toolsets: [web]           # Hide if the web toolset is NOT active
-    requires_tools: [web_search]       # Hide if web_search tool is NOT available
+    requires_tools: [web_extract]       # Hide if web_extract tool is NOT available
     fallback_for_toolsets: [browser]   # Hide if the browser toolset IS active
     fallback_for_tools: [browser_navigate]  # Hide if browser_navigate IS available
 ```
@@ -125,7 +125,7 @@ metadata:
 | `fallback_for_toolsets` | Skill is **hidden** when ANY listed toolset **is** available |
 | `fallback_for_tools` | Skill is **hidden** when ANY listed tool **is** available |
 
-**Use case for `fallback_for_*`:** Create a skill that serves as a workaround when a primary tool isn't available. For example, a `duckduckgo-search` skill with `fallback_for_tools: [web_search]` only shows when the web search tool (which requires an API key) is not configured.
+**Use case for `fallback_for_*`:** Create a skill that serves as a workaround when a primary tool isn't available. For example, a `duckduckgo-search` skill with `fallback_for_tools: [web_extract]` only shows when the web search tool (which requires an API key) is not configured.
 
 **Use case for `requires_*`:** Create a skill that only makes sense when certain tools are present. For example, a web scraping workflow skill with `requires_toolsets: [web]` won't clutter the prompt when web tools are disabled.
 

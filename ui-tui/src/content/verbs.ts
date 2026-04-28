@@ -15,7 +15,6 @@ export const TOOL_VERBS: Record<string, string> = {
   search_files: 'searching',
   terminal: 'terminal',
   web_extract: 'extracting',
-  web_search: 'searching',
   write_file: 'writing'
 }
 

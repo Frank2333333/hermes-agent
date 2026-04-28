@@ -97,7 +97,7 @@ browser:
 
 When `use_gateway: true` is set for a tool, the runtime routes API calls through the Nous Tool Gateway instead of using direct API keys:
 
-1. **Web tools** — `web_search` and `web_extract` use the gateway's Firecrawl endpoint
+1. **Web tools** — `web_extract` and `web_extract` use the gateway's Firecrawl endpoint
 2. **Image generation** — `image_generate` uses the gateway's FAL endpoint
 3. **TTS** — `text_to_speech` uses the gateway's OpenAI Audio endpoint
 4. **Browser** — `browser_navigate` and other browser tools use the gateway's Browser Use endpoint

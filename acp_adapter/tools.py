@@ -29,7 +29,6 @@ TOOL_KIND_MAP: Dict[str, ToolKind] = {
     "process": "execute",
     "execute_code": "execute",
     # Web / fetch
-    "web_search": "fetch",
     "web_extract": "fetch",
     # Browser
     "browser_navigate": "fetch",
@@ -78,8 +77,6 @@ def build_tool_title(tool_name: str, args: Dict[str, Any]) -> str:
         return f"patch ({mode}): {path}"
     if tool_name == "search_files":
         return f"search: {args.get('pattern', '?')}"
-    if tool_name == "web_search":
-        return f"web search: {args.get('query', '?')}"
     if tool_name == "web_extract":
         urls = args.get("urls", [])
         if urls:

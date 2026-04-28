@@ -71,8 +71,8 @@ def populated_db(db):
     db.update_token_counts("s2", input_tokens=20000, output_tokens=8000)
     db.append_message("s2", role="user", content="Search the web for something")
     db.append_message("s2", role="assistant", content="Searching...",
-                      tool_calls=[{"function": {"name": "web_search"}}])
-    db.append_message("s2", role="tool", content="results...", tool_name="web_search")
+                      tool_calls=[{"function": {"name": "web_extract"}}])
+    db.append_message("s2", role="tool", content="results...", tool_name="web_extract")
     db.append_message("s2", role="assistant", content="Here's what I found")
 
     # Session 3: CLI, deepseek-chat, ended, 10 days ago
@@ -343,7 +343,7 @@ class TestInsightsPopulated:
         assert "search_files" in tool_names
         assert "read_file" in tool_names
         assert "patch" in tool_names
-        assert "web_search" in tool_names
+        assert "web_extract" in tool_names
 
         # terminal was used 2x in s3
         terminal = next(t for t in tools if t["tool"] == "terminal")

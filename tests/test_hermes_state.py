@@ -166,7 +166,7 @@ class TestMessageStorage:
         Only assistant messages with tool_calls should count.
         """
         db.create_session(session_id="s1", source="cli")
-        db.append_message("s1", role="tool", content="result", tool_name="web_search")
+        db.append_message("s1", role="tool", content="result", tool_name="web_extract")
 
         session = db.get_session("s1")
         assert session["tool_call_count"] == 0
@@ -175,7 +175,7 @@ class TestMessageStorage:
         """An assistant message with N tool_calls should increment by N."""
         db.create_session(session_id="s1", source="cli")
         tool_calls = [
-            {"id": "call_1", "function": {"name": "web_search", "arguments": "{}"}},
+            {"id": "call_1", "function": {"name": "web_extract", "arguments": "{}"}},
         ]
         db.append_message("s1", role="assistant", content="", tool_calls=tool_calls)
 
@@ -206,7 +206,7 @@ class TestMessageStorage:
 
     def test_tool_calls_serialization(self, db):
         db.create_session(session_id="s1", source="cli")
-        tool_calls = [{"id": "call_1", "function": {"name": "web_search", "arguments": "{}"}}]
+        tool_calls = [{"id": "call_1", "function": {"name": "web_extract", "arguments": "{}"}}]
         db.append_message("s1", role="assistant", tool_calls=tool_calls)
 
         messages = db.get_messages("s1")

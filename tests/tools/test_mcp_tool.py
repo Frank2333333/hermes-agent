@@ -2951,7 +2951,7 @@ class TestMCPBuiltinCollisionGuard:
         from tools.mcp_tool import _discover_and_register_server, _servers, MCPServerTask
 
         mock_registry = ToolRegistry()
-        mock_tools = [_make_mcp_tool("web_search", "Search the web")]
+        mock_tools = [_make_mcp_tool("web_extract", "Search the web")]
         mock_session = MagicMock()
 
         async def fake_connect(name, config):
@@ -2966,8 +2966,8 @@ class TestMCPBuiltinCollisionGuard:
                 _discover_and_register_server("minimax", {"command": "test", "args": []})
             )
 
-        assert "mcp_minimax_web_search" in registered
-        assert mock_registry.get_toolset_for_tool("mcp_minimax_web_search") == "mcp-minimax"
+        assert "mcp_minimax_web_extract" in registered
+        assert mock_registry.get_toolset_for_tool("mcp_minimax_web_extract") == "mcp-minimax"
 
         _servers.pop("minimax", None)
 

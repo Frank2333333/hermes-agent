@@ -122,7 +122,7 @@ class TestInactivityTimeout:
             run_duration=5.0,  # would run forever without timeout
             idle_after=0.1,    # goes idle almost immediately
             activity_desc="api_call_streaming",
-            current_tool="web_search",
+            current_tool="web_extract",
             api_call_count=3,
             max_iterations=50,
         )

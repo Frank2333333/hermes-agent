@@ -42,7 +42,7 @@ python batch_runner.py \
 
 IMPORTANT GUIDELINES:
 
-1. SEARCHING: Do NOT search directly on Google via the browser â€” they block automated searches. Use the web_search tool first to find URLs, then navigate to them with browser tools.
+1. SEARCHING: Do NOT search directly on Google via the browser â€?they block automated searches. Use the web_extract tool first to find URLs, then navigate to them with browser tools.
 
 2. COOKIE/PRIVACY DIALOGS: After navigating to a page, check for cookie consent or privacy popups. Dismiss them by clicking Accept/Close/OK before interacting with other elements. Take a fresh browser_snapshot afterward.
 
@@ -51,7 +51,7 @@ IMPORTANT GUIDELINES:
 4. GENERAL: Use browser tools to click, fill forms, and extract information. Use terminal for local file operations. Verify your actions and handle errors gracefully." \
   2>&1 | tee "$LOG_FILE"
 
-echo "âœ… Done. Log: $LOG_FILE"
+echo "âœ?Done. Log: $LOG_FILE"
 
 # =============================================================================
 # Common options you can add:

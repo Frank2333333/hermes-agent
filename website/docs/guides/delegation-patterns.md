@@ -165,11 +165,11 @@ Use `execute_code` for mechanical data gathering, then delegate the reasoning-he
 ```python
 # Step 1: Mechanical gathering (execute_code is better here — no reasoning needed)
 execute_code("""
-from hermes_tools import web_search, web_extract
+from hermes_tools import web_extract, web_extract
 
 results = []
 for query in ["AI funding Q1 2026", "AI startup acquisitions 2026", "AI IPOs 2026"]:
-    r = web_search(query, limit=5)
+    r = web_extract(query, limit=5)
     for item in r["data"]["web"]:
         results.append({"title": item["title"], "url": item["url"], "desc": item["description"]})
 
@@ -205,7 +205,7 @@ Choose toolsets based on what the subagent needs:
 
 | Task type | Toolsets | Why |
 |-----------|----------|-----|
-| Web research | `["web"]` | web_search + web_extract only |
+| Web research | `["web"]` | web_extract + web_extract only |
 | Code work | `["terminal", "file"]` | Shell access + file operations |
 | Full-stack | `["terminal", "file", "web"]` | Everything except messaging |
 | Read-only analysis | `["file"]` | Can only read files, no shell |

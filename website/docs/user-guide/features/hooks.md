@@ -262,7 +262,7 @@ def my_callback(tool_name: str, args: dict, task_id: str, **kwargs):
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `tool_name` | `str` | Name of the tool about to execute (e.g. `"terminal"`, `"web_search"`, `"read_file"`) |
+| `tool_name` | `str` | Name of the tool about to execute (e.g. `"terminal"`, `"web_extract"`, `"read_file"`) |
 | `args` | `dict` | The arguments the model passed to the tool |
 | `task_id` | `str` | Session/task identifier. Empty string if not set. |
 

@@ -170,9 +170,6 @@ def _summarize_tool_result(tool_name: str, tool_args: str, tool_content: str) ->
         detail = f" {url}" if url else (f" ref={ref}" if ref else "")
         return f"[{tool_name}]{detail} ({content_len:,} chars)"
 
-    if tool_name == "web_search":
-        query = args.get("query", "?")
-        return f"[web_search] query='{query}' ({content_len:,} chars result)"
 
     if tool_name == "web_extract":
         urls = args.get("urls", [])

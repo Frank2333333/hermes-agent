@@ -1,4 +1,4 @@
-"""
+﻿"""
 Interactive setup wizard for Hermes Agent.
 
 Modular wizard with independently-runnable sections:
@@ -2161,50 +2161,6 @@ def _setup_qqbot():
     _gateway_setup_qqbot()
 
 
-def _setup_webhooks():
-    """Configure webhook integration."""
-    print_header("Webhooks")
-    existing = get_env_value("WEBHOOK_ENABLED")
-    if existing:
-        print_info("Webhooks: already configured")
-        if not prompt_yes_no("Reconfigure webhooks?", False):
-            return
-
-    print()
-    print_warning("⚠  Webhook and SMS platforms require exposing gateway ports to the")
-    print_warning("   internet. For security, run the gateway in a sandboxed environment")
-    print_warning("   (Docker, VM, etc.) to limit blast radius from prompt injection.")
-    print()
-    print_info("   Full guide: https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks/")
-    print()
-
-    port = prompt("Webhook port (default 8644)")
-    if port:
-        try:
-            save_env_value("WEBHOOK_PORT", str(int(port)))
-            print_success(f"Webhook port set to {port}")
-        except ValueError:
-            print_warning("Invalid port number, using default 8644")
-
-    secret = prompt("Global HMAC secret (shared across all routes)", password=True)
-    if secret:
-        save_env_value("WEBHOOK_SECRET", secret)
-        print_success("Webhook secret saved")
-    else:
-        print_warning("No secret set — you must configure per-route secrets in config.yaml")
-
-    save_env_value("WEBHOOK_ENABLED", "true")
-    print()
-    print_success("Webhooks enabled! Next steps:")
-    from hermes_constants import display_hermes_home as _dhh
-    print_info(f"   1. Define webhook routes in {_dhh()}/config.yaml")
-    print_info("   2. Point your service (GitHub, GitLab, etc.) at:")
-    print_info("      http://your-server:8644/webhooks/<route-name>")
-    print()
-    print_info("   Route configuration guide:")
-    print_info("   https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks/#configuring-routes")
-    print()
-    print_info("   Open config in your editor:  hermes config edit")
 
 
 # Platform registry for the gateway checklist
@@ -2225,7 +2181,6 @@ _GATEWAY_PLATFORMS = [
     ("Weixin (WeChat)", "WEIXIN_ACCOUNT_ID", _setup_weixin),
     ("BlueBubbles (iMessage)", "BLUEBUBBLES_SERVER_URL", _setup_bluebubbles),
     ("QQ Bot", "QQ_APP_ID", _setup_qqbot),
-    ("Webhooks (GitHub, GitLab, etc.)", "WEBHOOK_ENABLED", _setup_webhooks),
 ]
 
 
@@ -2277,7 +2232,6 @@ def setup_gateway(config: dict):
         or get_env_value("WEIXIN_ACCOUNT_ID")
         or get_env_value("BLUEBUBBLES_SERVER_URL")
         or get_env_value("QQ_APP_ID")
-        or get_env_value("WEBHOOK_ENABLED")
     )
     if any_messaging:
         print()

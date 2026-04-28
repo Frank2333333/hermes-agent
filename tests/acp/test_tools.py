@@ -46,8 +46,8 @@ class TestToolKindMap:
     def test_tool_kind_write_file(self):
         assert get_tool_kind("write_file") == "edit"
 
-    def test_tool_kind_web_search(self):
-        assert get_tool_kind("web_search") == "fetch"
+    def test_tool_kind_web_extract(self):
+        assert get_tool_kind("web_extract") == "fetch"
 
     def test_tool_kind_execute_code(self):
         assert get_tool_kind("execute_code") == "execute"
@@ -106,8 +106,8 @@ class TestBuildToolTitle:
         title = build_tool_title("search_files", {"pattern": "TODO"})
         assert "TODO" in title
 
-    def test_web_search_title(self):
-        title = build_tool_title("web_search", {"query": "python asyncio"})
+    def test_web_extract_title(self):
+        title = build_tool_title("web_extract", {"query": "python asyncio"})
         assert "python asyncio" in title
 
     def test_unknown_tool_uses_name(self):

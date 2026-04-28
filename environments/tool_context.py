@@ -343,22 +343,6 @@ class ToolContext:
     # Web tools
     # -------------------------------------------------------------------------
 
-    def web_search(self, query: str) -> Dict[str, Any]:
-        """
-        Search the web.
-
-        Args:
-            query: Search query
-
-        Returns:
-            Dict with search results
-        """
-        result = handle_function_call("web_search", {"query": query})
-        try:
-            return json.loads(result)
-        except json.JSONDecodeError:
-            return {"error": result}
-
     def web_extract(self, urls: List[str]) -> Dict[str, Any]:
         """
         Extract content from URLs.

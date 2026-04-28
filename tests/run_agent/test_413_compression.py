@@ -81,7 +81,7 @@ def _make_413_error(*, use_status_code=True, message="Request entity too large")
 @pytest.fixture()
 def agent():
     with (
-        patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_search")),
+        patch("run_agent.get_tool_definitions", return_value=_make_tool_defs("web_extract")),
         patch("run_agent.check_toolset_requirements", return_value={}),
         patch("run_agent.OpenAI"),
     ):
@@ -525,7 +525,7 @@ class TestToolResultPreflightCompression:
 
         tc = SimpleNamespace(
             id="tc1", type="function",
-            function=SimpleNamespace(name="web_search", arguments='{"query":"test"}'),
+            function=SimpleNamespace(name="web_extract", arguments='{"query":"test"}'),
         )
         tool_resp = _mock_response(
             content=None, finish_reason="stop", tool_calls=[tc],

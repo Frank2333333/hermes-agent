@@ -177,7 +177,7 @@ class TestReasoningCommand:
             "  exa:\n"
             "    url: https://mcp.exa.ai/mcp\n"
             "  web-search-prime:\n"
-            "    url: https://api.z.ai/api/mcp/web_search_prime/mcp\n",
+            "    url: https://api.z.ai/api/mcp/web_extract_prime/mcp\n",
             encoding="utf-8",
         )
 

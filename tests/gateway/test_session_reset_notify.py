@@ -178,7 +178,6 @@ class TestResetPolicyNotify:
     def test_notify_exclude_defaults(self):
         policy = SessionResetPolicy()
         assert "api_server" in policy.notify_exclude_platforms
-        assert "webhook" in policy.notify_exclude_platforms
 
     def test_from_dict_with_notify_false(self):
         policy = SessionResetPolicy.from_dict({"notify": False})
@@ -186,7 +185,7 @@ class TestResetPolicyNotify:
 
     def test_from_dict_with_custom_excludes(self):
         policy = SessionResetPolicy.from_dict({
-            "notify_exclude_platforms": ["api_server", "webhook", "homeassistant"],
+            "notify_exclude_platforms": ["api_server", "homeassistant"],
         })
         assert "homeassistant" in policy.notify_exclude_platforms
 

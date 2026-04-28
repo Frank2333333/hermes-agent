@@ -258,7 +258,7 @@ The CLI shows animated feedback as the agent works:
 **Tool execution feed:**
 ```
   ┊ 💻 terminal `ls -la` (0.3s)
-  ┊ 🔍 web_search (1.2s)
+  ┊ 🔍 web_extract (1.2s)
   ┊ 📄 web_extract (2.1s)
 ```
 
