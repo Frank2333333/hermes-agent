@@ -2,7 +2,7 @@
 Unified tool configuration for Hermes Agent.
 
 `hermes tools` and `hermes setup tools` both enter this module.
-Select a platform → toggle toolsets on/off → for newly enabled tools
+Select a platform �?toggle toolsets on/off �?for newly enabled tools
 that need API keys, run through provider-aware configuration.
 
 Saves per-platform tool configuration to ~/.hermes/config.yaml under
@@ -34,7 +34,7 @@ PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 
 # ─── UI Helpers (shared with setup.py) ────────────────────────────────────────
 
-from hermes_cli.cli_output import (  # noqa: E402 — late import block
+from hermes_cli.cli_output import (  # noqa: E402 �?late import block
     print_error as _print_error,
     print_info as _print_info,
     print_success as _print_success,
@@ -48,31 +48,28 @@ from hermes_cli.cli_output import (  # noqa: E402 — late import block
 # Each entry: (toolset_name, label, description)
 # These map to keys in toolsets.py TOOLSETS dict.
 CONFIGURABLE_TOOLSETS = [
-    ("web",             "🔍 Web Extraction",    "web_extract"),
-    ("browser",         "🌐 Browser Automation",       "navigate, click, type, scroll"),
-    ("terminal",        "💻 Terminal & Processes",      "terminal, process"),
-    ("file",            "📁 File Operations",           "read, write, patch, search"),
-    ("code_execution",  "⚡ Code Execution",            "execute_code"),
-    ("vision",          "👁️  Vision / Image Analysis",  "vision_analyze"),
-    ("image_gen",       "🎨 Image Generation",          "image_generate"),
-    ("moa",             "🧠 Mixture of Agents",         "mixture_of_agents"),
-    ("tts",             "🔊 Text-to-Speech",            "text_to_speech"),
-    ("skills",          "📚 Skills",                    "list, view, manage"),
-    ("todo",            "📋 Task Planning",             "todo"),
-    ("memory",          "💾 Memory",                    "persistent memory across sessions"),
-    ("session_search",  "🔎 Session Search",            "search past conversations"),
-    ("clarify",         "❓ Clarifying Questions",      "clarify"),
-    ("delegation",      "👥 Task Delegation",           "delegate_task"),
-    ("cronjob",         "⏰ Cron Jobs",                 "create/list/update/pause/resume/run, with optional attached skills"),
-    ("messaging",       "📨 Cross-Platform Messaging",  "disabled"),
-    ("rl",              "🧪 RL Training",               "Tinker-Atropos training tools"),
-    ("homeassistant",    "🏠 Home Assistant",           "smart home device control"),
+    ("web", "Web Extraction", "web_extract"),
+    ("browser", "Browser Automation", "navigate, click, type, scroll"),
+    ("terminal", "Terminal & Processes", "terminal, process"),
+    ("file", "File Operations", "read, write, patch, search"),
+    ("code_execution", "Code Execution", "execute_code"),
+    ("vision", "Vision / Image Analysis", "vision_analyze"),
+    ("image_gen", "Image Generation", "image_generate"),
+    ("tts", "Text-to-Speech", "text_to_speech"),
+    ("skills", "Skills", "list, view, manage"),
+    ("todo", "Task Planning", "todo"),
+    ("memory", "Memory", "persistent memory across sessions"),
+    ("session_search", "Session Search", "search past conversations"),
+    ("clarify", "Clarifying Questions", "clarify"),
+    ("delegation", "Task Delegation", "delegate_task"),
+    ("cronjob", "Cron Jobs", "create/list/update/pause/resume/run, with optional attached skills"),
+    ("messaging", "Cross-Platform Messaging", "disabled"),
 ]
 
 # Toolsets that are OFF by default for new installs.
 # They're still in _HERMES_CORE_TOOLS (available at runtime if enabled),
 # but the setup checklist won't pre-select them for first-time users.
-_DEFAULT_OFF_TOOLSETS = {"moa", "homeassistant", "rl"}
+_DEFAULT_OFF_TOOLSETS = set()
 
 
 def _get_effective_configurable_toolsets():
@@ -84,7 +81,7 @@ def _get_effective_configurable_toolsets():
     result = list(CONFIGURABLE_TOOLSETS)
     try:
         from hermes_cli.plugins import discover_plugins, get_plugin_toolsets
-        discover_plugins()  # idempotent — ensures plugins are loaded
+        discover_plugins()  # idempotent �?ensures plugins are loaded
         result.extend(get_plugin_toolsets())
     except Exception:
         pass
@@ -95,12 +92,12 @@ def _get_plugin_toolset_keys() -> set:
     """Return the set of toolset keys provided by plugins."""
     try:
         from hermes_cli.plugins import discover_plugins, get_plugin_toolsets
-        discover_plugins()  # idempotent — ensures plugins are loaded
+        discover_plugins()  # idempotent �?ensures plugins are loaded
         return {ts_key for ts_key, _, _ in get_plugin_toolsets()}
     except Exception:
         return set()
 
-# Platform display config — derived from the canonical registry so every
+# Platform display config �?derived from the canonical registry so every
 # module shares the same data.  Kept as dict-of-dicts for backward
 # compatibility with existing ``PLATFORMS[key]["label"]`` access patterns.
 from hermes_cli.platforms import PLATFORMS as _PLATFORMS_REGISTRY
@@ -133,7 +130,7 @@ TOOL_CATEGORIES = {
             },
             {
                 "name": "Microsoft Edge TTS",
-                "badge": "★ recommended · free",
+                "badge": "�?recommended · free",
                 "tag": "Good quality, no API key needed",
                 "env_vars": [],
                 "tts_provider": "edge",
@@ -195,7 +192,7 @@ TOOL_CATEGORIES = {
     "web": {
         "name": "Web Search & Extract",
         "setup_title": "Select Search Provider",
-        "setup_note": "A free DuckDuckGo search skill is also included — skip this if you don't need a premium provider.",
+        "setup_note": "A free DuckDuckGo search skill is also included �?skip this if you don't need a premium provider.",
         "icon": "🔍",
         "providers": [
             {
@@ -210,7 +207,7 @@ TOOL_CATEGORIES = {
             },
             {
                 "name": "Firecrawl Cloud",
-                "badge": "★ recommended",
+                "badge": "�?recommended",
                 "tag": "Full-featured search, extract, and crawl",
                 "web_backend": "firecrawl",
                 "env_vars": [
@@ -238,7 +235,7 @@ TOOL_CATEGORIES = {
             {
                 "name": "Tavily",
                 "badge": "free tier",
-                "tag": "Search, extract, and crawl — 1000 free searches/mo",
+                "tag": "Search, extract, and crawl �?1000 free searches/mo",
                 "web_backend": "tavily",
                 "env_vars": [
                     {"key": "TAVILY_API_KEY", "prompt": "Tavily API key", "url": "https://app.tavily.com/home"},
@@ -297,7 +294,7 @@ TOOL_CATEGORIES = {
             },
             {
                 "name": "Local Browser",
-                "badge": "★ recommended · free",
+                "badge": "�?recommended · free",
                 "tag": "Headless Chromium, no API key needed",
                 "env_vars": [],
                 "browser_provider": "local",
@@ -347,43 +344,14 @@ TOOL_CATEGORIES = {
             },
         ],
     },
-    "homeassistant": {
-        "name": "Smart Home",
-        "icon": "🏠",
-        "providers": [
-            {
-                "name": "Home Assistant",
-                "tag": "REST API integration",
-                "env_vars": [
-                    {"key": "HASS_TOKEN", "prompt": "Home Assistant Long-Lived Access Token"},
-                    {"key": "HASS_URL", "prompt": "Home Assistant URL", "default": "http://homeassistant.local:8123"},
-                ],
-            },
-        ],
-    },
-    "rl": {
-        "name": "RL Training",
-        "icon": "🧪",
-        "requires_python": (3, 11),
-        "providers": [
-            {
-                "name": "Tinker / Atropos",
-                "tag": "RL training platform",
-                "env_vars": [
-                    {"key": "TINKER_API_KEY", "prompt": "Tinker API key", "url": "https://tinker-console.thinkingmachines.ai/keys"},
-                    {"key": "WANDB_API_KEY", "prompt": "WandB API key", "url": "https://wandb.ai/authorize"},
-                ],
-                "post_setup": "rl_training",
-            },
-        ],
-    },
 }
 
 # Simple env-var requirements for toolsets NOT in TOOL_CATEGORIES.
-# Used as a fallback for tools like vision/moa that just need an API key.
+# Used as a fallback for toolsets like vision that just need an API key.
 TOOLSET_ENV_REQUIREMENTS = {
-    "vision":     [("OPENROUTER_API_KEY",   "https://openrouter.ai/keys")],
-    "moa":        [("OPENROUTER_API_KEY",   "https://openrouter.ai/keys")],
+    "vision": [
+        ("OPENAI_API_KEY", "https://platform.openai.com/api-keys"),
+    ],
 }
 
 
@@ -461,51 +429,11 @@ def _run_post_setup(post_setup_key: str):
             _print_warning("    kittentts install timed out (>5min)")
             _print_info(f"    Run manually: python -m pip install -U '{wheel_url}' soundfile")
 
-    elif post_setup_key == "rl_training":
-        try:
-            __import__("tinker_atropos")
-        except ImportError:
-            tinker_dir = PROJECT_ROOT / "tinker-atropos"
-            if tinker_dir.exists() and (tinker_dir / "pyproject.toml").exists():
-                _print_info("    Installing tinker-atropos submodule...")
-                import subprocess
-                uv_bin = shutil.which("uv")
-                if uv_bin:
-                    result = subprocess.run(
-                        [uv_bin, "pip", "install", "--python", sys.executable, "-e", str(tinker_dir)],
-                        capture_output=True, text=True
-                    )
-                else:
-                    result = subprocess.run(
-                        [sys.executable, "-m", "pip", "install", "-e", str(tinker_dir)],
-                        capture_output=True, text=True
-                    )
-                if result.returncode == 0:
-                    _print_success("    tinker-atropos installed")
-                else:
-                    _print_warning("    tinker-atropos install failed - run manually:")
-                    _print_info('      uv pip install -e "./tinker-atropos"')
-            else:
-                _print_warning("    tinker-atropos submodule not found - run:")
-                _print_info("      git submodule update --init --recursive")
-                _print_info('      uv pip install -e "./tinker-atropos"')
-
-
 # ─── Platform / Toolset Helpers ───────────────────────────────────────────────
 
 def _get_enabled_platforms() -> List[str]:
-    """Return platform keys that are configured (have tokens or are CLI)."""
-    enabled = ["cli"]
-    if get_env_value("TELEGRAM_BOT_TOKEN"):
-        enabled.append("telegram")
-    if get_env_value("DISCORD_BOT_TOKEN"):
-        enabled.append("discord")
-    if get_env_value("SLACK_BOT_TOKEN"):
-        enabled.append("slack")
-    if get_env_value("WHATSAPP_ENABLED"):
-        enabled.append("whatsapp")
-    if get_env_value("QQ_APP_ID"):
-        enabled.append("qqbot")
+    """Return enterprise platform keys that should appear in tool config."""
+    enabled = ["cli", "api_server"]
     return enabled
 
 
@@ -565,7 +493,7 @@ def _get_platform_tools(
     configurable_keys = {ts_key for ts_key, _, _ in CONFIGURABLE_TOOLSETS}
 
     # If the saved list contains any configurable keys directly, the user
-    # has explicitly configured this platform — use direct membership.
+    # has explicitly configured this platform �?use direct membership.
     # This avoids the subset-inference bug where composite toolsets like
     # "hermes-cli" (which include all _HERMES_CORE_TOOLS) cause disabled
     # toolsets to re-appear as enabled.
@@ -574,7 +502,7 @@ def _get_platform_tools(
     if has_explicit_config:
         enabled_toolsets = {ts for ts in toolset_names if ts in configurable_keys}
     else:
-        # No explicit config — fall back to resolving composite toolset names
+        # No explicit config �?fall back to resolving composite toolset names
         # (e.g. "hermes-cli") to individual tool names and reverse-mapping.
         all_tool_names = set()
         for ts_name in toolset_names:
@@ -600,10 +528,10 @@ def _get_platform_tools(
         known_for_platform = set(known_map.get(platform, []))
         for pts in plugin_ts_keys:
             if pts in toolset_names:
-                # Explicitly listed in config — enabled
+                # Explicitly listed in config �?enabled
                 enabled_toolsets.add(pts)
             elif pts not in known_for_platform:
-                # New plugin not yet seen by hermes tools — default enabled
+                # New plugin not yet seen by hermes tools �?default enabled
                 enabled_toolsets.add(pts)
             # else: known but not in config = user disabled it
 
@@ -843,7 +771,7 @@ def _configure_toolset(ts_key: str, config: dict):
     if cat:
         _configure_tool_category(ts_key, cat, config)
     else:
-        # Simple fallback for vision, moa, etc.
+        # Simple fallback for toolsets that only need env-based requirements.
         _configure_simple_requirements(ts_key)
 
 
@@ -855,7 +783,7 @@ def _plugin_image_gen_providers() -> list[dict]:
     code (config writing, model picker) knows to route through the
     plugin registry instead of the in-tree FAL backend.
 
-    FAL is skipped — it's already exposed by the hardcoded
+    FAL is skipped �?it's already exposed by the hardcoded
     ``TOOL_CATEGORIES["image_gen"]`` entries. When FAL gets ported to
     a plugin in a follow-up PR, the hardcoded entries go away and this
     function surfaces it alongside OpenAI automatically.
@@ -989,7 +917,7 @@ def _configure_tool_category(ts_key: str, cat: dict, config: dict):
         provider_choices = []
         for p in providers:
             badge = f" [{p['badge']}]" if p.get("badge") else ""
-            tag = f" — {p['tag']}" if p.get("tag") else ""
+            tag = f" �?{p['tag']}" if p.get("tag") else ""
             configured = ""
             env_vars = p.get("env_vars", [])
             if not env_vars or all(get_env_value(v["key"]) for v in env_vars):
@@ -1002,7 +930,7 @@ def _configure_tool_category(ts_key: str, cat: dict, config: dict):
             provider_choices.append(f"{p['name']}{badge}{tag}{configured}")
 
         # Add skip option
-        provider_choices.append("Skip — keep defaults / configure later")
+        provider_choices.append("Skip �?keep defaults / configure later")
 
         # Detect current provider as default
         default_idx = _detect_active_provider_index(providers, config)
@@ -1056,7 +984,7 @@ def _detect_active_provider_index(providers: list, config: dict) -> int:
     for i, p in enumerate(providers):
         if _is_provider_active(p, config):
             return i
-        # Fallback: env vars present → likely configured
+        # Fallback: env vars present �?likely configured
         env_vars = p.get("env_vars", [])
         if env_vars and all(get_env_value(v["key"]) for v in env_vars):
             return i
@@ -1105,7 +1033,7 @@ def _configure_imagegen_model(backend_name: str, config: dict) -> None:
     """Prompt the user to pick a model for the given imagegen backend.
 
     Writes selection to ``config[backend_config_key]["model"]``. Safe to
-    call even when stdin is not a TTY — curses_radiolist falls back to
+    call even when stdin is not a TTY �?curses_radiolist falls back to
     keeping the current selection.
     """
     backend = IMAGEGEN_BACKENDS.get(backend_name)
@@ -1149,7 +1077,7 @@ def _configure_imagegen_model(backend_name: str, config: dict) -> None:
     for mid in ordered:
         row = _format_imagegen_model_row(mid, catalog[mid], widths)
         if mid == current_model:
-            row += "  ← currently in use"
+            row += "  �?currently in use"
         rows.append(row)
 
     idx = _prompt_choice(
@@ -1166,8 +1094,8 @@ def _configure_imagegen_model(backend_name: str, config: dict) -> None:
 def _plugin_image_gen_catalog(plugin_name: str):
     """Return ``(catalog_dict, default_model_id)`` for a plugin provider.
 
-    ``catalog_dict`` is shaped like the legacy ``FAL_MODELS`` table —
-    ``{model_id: {"display", "speed", "strengths", "price", ...}}`` —
+    ``catalog_dict`` is shaped like the legacy ``FAL_MODELS`` table �?
+    ``{model_id: {"display", "speed", "strengths", "price", ...}}`` �?
     so the existing picker code paths work without change. Returns
     ``({}, None)`` if the provider isn't registered or has no models.
     """
@@ -1231,7 +1159,7 @@ def _configure_imagegen_model_for_plugin(plugin_name: str, config: dict) -> None
     for mid in ordered:
         row = _format_imagegen_model_row(mid, catalog[mid], widths)
         if mid == current_model:
-            row += "  ← currently in use"
+            row += "  �?currently in use"
         rows.append(row)
 
     idx = _prompt_choice(
@@ -1286,7 +1214,7 @@ def _configure_provider(provider: dict, config: dict):
     if managed_feature and managed_feature not in ("web", "tts", "browser"):
         config.setdefault(managed_feature, {})["use_gateway"] = True
     elif not managed_feature:
-        # User picked a non-gateway provider — find which category this
+        # User picked a non-gateway provider �?find which category this
         # belongs to and clear use_gateway if it was previously set.
         for cat_key, cat in TOOL_CATEGORIES.items():
             if provider in cat.get("providers", []):
@@ -1384,8 +1312,8 @@ def _configure_simple_requirements(ts_key: str):
         print()
         print(color("  Vision / Image Analysis requires a multimodal backend:", Colors.YELLOW))
         choices = [
-            "OpenRouter — uses Gemini",
-            "OpenAI-compatible endpoint — base URL, API key, and vision model",
+            "OpenRouter �?uses Gemini",
+            "OpenAI-compatible endpoint �?base URL, API key, and vision model",
             "Skip",
         ]
         idx = _prompt_choice("  Configure vision backend", choices, 2)
@@ -1404,7 +1332,7 @@ def _configure_simple_requirements(ts_key: str):
             api_key = _prompt(key_label, password=True)
             if api_key and api_key.strip():
                 save_env_value("OPENAI_API_KEY", api_key.strip())
-                # Save vision base URL to config (not .env — only secrets go there)
+                # Save vision base URL to config (not .env �?only secrets go there)
                 _cfg = load_config()
                 _aux = _cfg.setdefault("auxiliary", {}).setdefault("vision", {})
                 _aux["base_url"] = base_url
@@ -1492,7 +1420,7 @@ def _configure_tool_category_for_reconfig(ts_key: str, cat: dict, config: dict):
         provider_choices = []
         for p in providers:
             badge = f" [{p['badge']}]" if p.get("badge") else ""
-            tag = f" — {p['tag']}" if p.get("tag") else ""
+            tag = f" �?{p['tag']}" if p.get("tag") else ""
             configured = ""
             env_vars = p.get("env_vars", [])
             if not env_vars or all(get_env_value(v["key"]) for v in env_vars):
@@ -1618,7 +1546,7 @@ def tools_command(args=None, first_install: bool = False, config: dict = None):
     # Non-interactive summary mode for CLI usage
     if getattr(args, "summary", False):
         total = len(_get_effective_configurable_toolsets())
-        print(color("⚕ Tool Summary", Colors.CYAN, Colors.BOLD))
+        print(color("�?Tool Summary", Colors.CYAN, Colors.BOLD))
         print()
         summary = _platform_toolset_summary(config, enabled_platforms)
         for pkey in enabled_platforms:
@@ -1629,12 +1557,12 @@ def tools_command(args=None, first_install: bool = False, config: dict = None):
             if enabled:
                 for ts_key in sorted(enabled):
                     label = next((l for k, l, _ in _get_effective_configurable_toolsets() if k == ts_key), ts_key)
-                    print(color(f"    ✓ {label}", Colors.GREEN))
+                    print(color(f"    �?{label}", Colors.GREEN))
             else:
                 print(color("    (none enabled)", Colors.DIM))
         print()
         return
-    print(color("⚕ Hermes Tool Configuration", Colors.CYAN, Colors.BOLD))
+    print(color("�?Hermes Tool Configuration", Colors.CYAN, Colors.BOLD))
     print(color("  Enable or disable tools per platform.", Colors.DIM))
     print(color("  Tools that need API keys will be configured when enabled.", Colors.DIM))
     print(color("  Guide: https://hermes-agent.nousresearch.com/docs/user-guide/features/tools", Colors.DIM))
@@ -1670,7 +1598,7 @@ def tools_command(args=None, first_install: bool = False, config: dict = None):
             if managed_nous_tools_enabled():
                 for ts_key in sorted(auto_configured):
                     label = next((l for k, l, _ in CONFIGURABLE_TOOLSETS if k == ts_key), ts_key)
-                    print(color(f"  ✓ {label}: using your Nous subscription defaults", Colors.GREEN))
+                    print(color(f"  �?{label}: using your Nous subscription defaults", Colors.GREEN))
 
             # Walk through ALL selected tools that have provider options or
             # need API keys.  This ensures browser (Local vs Browserbase),
@@ -1687,7 +1615,7 @@ def tools_command(args=None, first_install: bool = False, config: dict = None):
                 print(color(f"  Configuring {len(to_configure)} tool(s):", Colors.YELLOW))
                 for ts_key in to_configure:
                     label = next((l for k, l, _ in _get_effective_configurable_toolsets() if k == ts_key), ts_key)
-                    print(color(f"    • {label}", Colors.DIM))
+                    print(color(f"    �?{label}", Colors.DIM))
                 print(color("  You can skip any tool you don't need right now.", Colors.DIM))
                 print()
                 for ts_key in to_configure:
@@ -1695,7 +1623,7 @@ def tools_command(args=None, first_install: bool = False, config: dict = None):
 
             _save_platform_tools(config, pkey, new_enabled)
             save_config(config)
-            print(color(f"  ✓ Saved {pinfo['label']} tool configuration", Colors.GREEN))
+            print(color(f"  �?Saved {pinfo['label']} tool configuration", Colors.GREEN))
             print()
 
         return
@@ -1776,7 +1704,7 @@ def tools_command(args=None, first_install: bool = False, config: dict = None):
                                 _configure_toolset(ts_key, config)
                     _save_platform_tools(config, pk, new_enabled)
                 save_config(config)
-                print(color("  ✓ Saved configuration for all platforms", Colors.GREEN))
+                print(color("  �?Saved configuration for all platforms", Colors.GREEN))
                 # Update choice labels
                 for ci, pk in enumerate(platform_keys):
                     new_count = len(_get_platform_tools(config, pk, include_default_mcp_servers=False))
@@ -1817,7 +1745,7 @@ def tools_command(args=None, first_install: bool = False, config: dict = None):
 
             _save_platform_tools(config, pkey, new_enabled)
             save_config(config)
-            print(color(f"  ✓ Saved {pinfo['label']} configuration", Colors.GREEN))
+            print(color(f"  �?Saved {pinfo['label']} configuration", Colors.GREEN))
         else:
             print(color(f"  No changes to {pinfo['label']}", Colors.DIM))
 
@@ -1944,10 +1872,10 @@ def _configure_mcp_tools_interactive(config: dict):
 
         if new_exclude:
             tools_cfg["exclude"] = new_exclude
-            # Remove include if present — we're switching to exclude mode
+            # Remove include if present �?we're switching to exclude mode
             tools_cfg.pop("include", None)
         else:
-            # All tools enabled — clear filters
+            # All tools enabled �?clear filters
             tools_cfg.pop("exclude", None)
             tools_cfg.pop("include", None)
 
@@ -1961,7 +1889,7 @@ def _configure_mcp_tools_interactive(config: dict):
     if any_changes:
         save_config(config)
         print()
-        print(color("  ✓ MCP tool configuration saved", Colors.GREEN))
+        print(color("  �?MCP tool configuration saved", Colors.GREEN))
     else:
         print(color("  No changes to MCP tools", Colors.DIM))
 
@@ -2013,8 +1941,8 @@ def _print_tools_list(enabled_toolsets: set, mcp_servers: dict, platform: str = 
     for ts_key, label, _ in effective:
         if ts_key not in builtin_keys:
             continue
-        status = (color("✓ enabled", Colors.GREEN) if ts_key in enabled_toolsets
-                  else color("✗ disabled", Colors.RED))
+        status = (color("�?enabled", Colors.GREEN) if ts_key in enabled_toolsets
+                  else color("�?disabled", Colors.RED))
         print(f"  {status}  {ts_key}  {color(label, Colors.DIM)}")
 
     # Plugin toolsets
@@ -2023,8 +1951,8 @@ def _print_tools_list(enabled_toolsets: set, mcp_servers: dict, platform: str = 
         print()
         print(f"Plugin toolsets ({platform}):")
         for ts_key, label in plugin_entries:
-            status = (color("✓ enabled", Colors.GREEN) if ts_key in enabled_toolsets
-                      else color("✗ disabled", Colors.RED))
+            status = (color("�?enabled", Colors.GREEN) if ts_key in enabled_toolsets
+                      else color("�?disabled", Colors.RED))
             print(f"  {status}  {ts_key}  {color(label, Colors.DIM)}")
 
     if mcp_servers:
@@ -2090,3 +2018,6 @@ def tools_disable_enable_command(args):
     if successful:
         verb = "Disabled" if action == "disable" else "Enabled"
         _print_success(f"{verb}: {', '.join(successful)}")
+
+
+

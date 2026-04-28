@@ -1,12 +1,12 @@
-﻿"""
+"""
 Interactive setup wizard for Hermes Agent.
 
 Modular wizard with independently-runnable sections:
   1. Model & Provider — choose your AI provider and model
   2. Terminal Backend — where your agent runs commands
   3. Agent Settings — iterations, compression, session reset
-  4. Messaging Platforms — connect Telegram, Discord, etc.
-  5. Tools — configure TTS, web search, image generation, etc.
+  4. Gateway Runtime — enterprise gateway notice and API server entrypoint
+  5. Tools — configure TTS, web extraction, browser automation, etc.
 
 Config files are stored in ~/.hermes/ for easy access.
 """
@@ -185,7 +185,7 @@ def print_noninteractive_setup_guidance(reason: str | None = None) -> None:
     print_info("  hermes config set model.base_url http://localhost:8080/v1")
     print_info("  hermes config set model.default your-model-name")
     print()
-    print_info("Or set OPENROUTER_API_KEY / OPENAI_API_KEY in your environment.")
+    print_info("Or set OPENAI_API_KEY in your environment.")
     print_info("Run 'hermes setup' in an interactive terminal to use the full wizard.")
     print()
 
@@ -364,12 +364,6 @@ def _print_setup_summary(config: dict, hermes_home):
     else:
         tool_status.append(("Vision (image analysis)", False, "run 'hermes setup' to configure"))
 
-    # Mixture of Agents — requires OpenRouter specifically (calls multiple models)
-    if get_env_value("OPENROUTER_API_KEY"):
-        tool_status.append(("Mixture of Agents", True, None))
-    else:
-        tool_status.append(("Mixture of Agents", False, "OPENROUTER_API_KEY"))
-
     # Web tools (Exa, Parallel, Firecrawl, or Tavily)
     if subscription_features.web.managed_by_nous:
         tool_status.append(("Web Search & Extract (Nous subscription)", True, None))
@@ -488,18 +482,6 @@ def _print_setup_summary(config: dict, hermes_home):
     elif managed_nous_tools_enabled() and subscription_features.nous_auth_present:
         tool_status.append(("Modal Execution (optional via Nous subscription)", True, None))
 
-    # Tinker + WandB (RL training)
-    if get_env_value("TINKER_API_KEY") and get_env_value("WANDB_API_KEY"):
-        tool_status.append(("RL Training (Tinker)", True, None))
-    elif get_env_value("TINKER_API_KEY"):
-        tool_status.append(("RL Training (Tinker)", False, "WANDB_API_KEY"))
-    else:
-        tool_status.append(("RL Training (Tinker)", False, "TINKER_API_KEY"))
-
-    # Home Assistant
-    if get_env_value("HASS_TOKEN"):
-        tool_status.append(("Smart Home (Home Assistant)", True, None))
-
     # Skills Hub
     if get_env_value("GITHUB_TOKEN"):
         tool_status.append(("Skills Hub (GitHub)", True, None))
@@ -578,7 +560,7 @@ def _print_setup_summary(config: dict, hermes_home):
     print(f"   {color('hermes setup', Colors.GREEN)}          Re-run the full wizard")
     print(f"   {color('hermes setup model', Colors.GREEN)}    Change model/provider")
     print(f"   {color('hermes setup terminal', Colors.GREEN)} Change terminal backend")
-    print(f"   {color('hermes setup gateway', Colors.GREEN)}  Configure messaging")
+    print(f"   {color('hermes setup gateway', Colors.GREEN)}  Review enterprise gateway notice")
     print(f"   {color('hermes setup tools', Colors.GREEN)}    Configure tool providers")
     print()
     print(f"   {color('hermes config', Colors.GREEN)}         View current settings")
@@ -598,7 +580,7 @@ def _print_setup_summary(config: dict, hermes_home):
     print(color("🚀 Ready to go!", Colors.CYAN, Colors.BOLD))
     print()
     print(f"   {color('hermes', Colors.GREEN)}              Start chatting")
-    print(f"   {color('hermes gateway', Colors.GREEN)}      Start messaging gateway")
+    print(f"   {color('hermes gateway run', Colors.GREEN)}  Start the enterprise API server runtime")
     print(f"   {color('hermes doctor', Colors.GREEN)}       Check for issues")
     print()
 
@@ -1214,10 +1196,10 @@ def setup_terminal_backend(config: dict):
         print_success("Terminal backend: Local")
         print_info("Commands run directly on this machine.")
 
-        # CWD for messaging
+        # CWD for gateway-originated sessions
         print()
-        print_info("Working directory for messaging sessions:")
-        print_info("  When using Hermes via Telegram/Discord, this is where")
+        print_info("Working directory for gateway sessions:")
+        print_info("  When Hermes handles gateway-originated requests, this is where")
         print_info(
             "  the agent starts. CLI mode always starts in the current directory."
         )
@@ -1560,7 +1542,7 @@ def setup_agent_settings(config: dict):
     # ── Tool Progress Display ──
     print_info("")
     print_info("Tool Progress Display")
-    print_info("Controls how much tool activity is shown (CLI and messaging).")
+    print_info("Controls how much tool activity is shown (CLI and API server).")
     print_info("  off     — Silent, just the final response")
     print_info("  new     — Show tool name only when it changes (less noise)")
     print_info("  all     — Show every tool call with a short preview")
@@ -1602,7 +1584,7 @@ def setup_agent_settings(config: dict):
     # ── Session Reset Policy ──
     print_header("Session Reset Policy")
     print_info(
-        "Messaging sessions (Telegram, Discord, etc.) accumulate context over time."
+        "Gateway sessions accumulate context over time just like local CLI sessions."
     )
     print_info(
         "Each message adds to the conversation history, which means growing API costs."
@@ -1696,682 +1678,12 @@ def setup_agent_settings(config: dict):
     save_config(config)
 
 
-# =============================================================================
-# Section 4: Messaging Platforms (Gateway)
-# =============================================================================
-
-
-def _setup_telegram():
-    """Configure Telegram bot credentials and allowlist."""
-    print_header("Telegram")
-    existing = get_env_value("TELEGRAM_BOT_TOKEN")
-    if existing:
-        print_info("Telegram: already configured")
-        if not prompt_yes_no("Reconfigure Telegram?", False):
-            # Check missing allowlist on existing config
-            if not get_env_value("TELEGRAM_ALLOWED_USERS"):
-                print_info("⚠️  Telegram has no user allowlist - anyone can use your bot!")
-                if prompt_yes_no("Add allowed users now?", True):
-                    print_info("   To find your Telegram user ID: message @userinfobot")
-                    allowed_users = prompt("Allowed user IDs (comma-separated)")
-                    if allowed_users:
-                        save_env_value("TELEGRAM_ALLOWED_USERS", allowed_users.replace(" ", ""))
-                        print_success("Telegram allowlist configured")
-            return
-
-    print_info("Create a bot via @BotFather on Telegram")
-    import re
-
-    while True:
-        token = prompt("Telegram bot token", password=True)
-        if not token:
-            return
-        if not re.match(r"^\d+:[A-Za-z0-9_-]{30,}$", token):
-            print_error(
-                "Invalid token format. Expected: <numeric_id>:<alphanumeric_hash> "
-                "(e.g., 123456789:ABCdefGHI-jklMNOpqrSTUvwxYZ)"
-            )
-            continue
-        break
-    save_env_value("TELEGRAM_BOT_TOKEN", token)
-    print_success("Telegram token saved")
-
-    print()
-    print_info("🔒 Security: Restrict who can use your bot")
-    print_info("   To find your Telegram user ID:")
-    print_info("   1. Message @userinfobot on Telegram")
-    print_info("   2. It will reply with your numeric ID (e.g., 123456789)")
-    print()
-    allowed_users = prompt(
-        "Allowed user IDs (comma-separated, leave empty for open access)"
-    )
-    if allowed_users:
-        save_env_value("TELEGRAM_ALLOWED_USERS", allowed_users.replace(" ", ""))
-        print_success("Telegram allowlist configured - only listed users can use the bot")
-    else:
-        print_info("⚠️  No allowlist set - anyone who finds your bot can use it!")
-
-    print()
-    print_info("📬 Home Channel: where Hermes delivers cron job results,")
-    print_info("   cross-platform messages, and notifications.")
-    print_info("   For Telegram DMs, this is your user ID (same as above).")
-
-    first_user_id = allowed_users.split(",")[0].strip() if allowed_users else ""
-    if first_user_id:
-        if prompt_yes_no(f"Use your user ID ({first_user_id}) as the home channel?", True):
-            save_env_value("TELEGRAM_HOME_CHANNEL", first_user_id)
-            print_success(f"Telegram home channel set to {first_user_id}")
-        else:
-            home_channel = prompt("Home channel ID (or leave empty to set later with /set-home in Telegram)")
-            if home_channel:
-                save_env_value("TELEGRAM_HOME_CHANNEL", home_channel)
-    else:
-        print_info("   You can also set this later by typing /set-home in your Telegram chat.")
-        home_channel = prompt("Home channel ID (leave empty to set later)")
-        if home_channel:
-            save_env_value("TELEGRAM_HOME_CHANNEL", home_channel)
-
-
-def _setup_discord():
-    """Configure Discord bot credentials and allowlist."""
-    print_header("Discord")
-    existing = get_env_value("DISCORD_BOT_TOKEN")
-    if existing:
-        print_info("Discord: already configured")
-        if not prompt_yes_no("Reconfigure Discord?", False):
-            if not get_env_value("DISCORD_ALLOWED_USERS"):
-                print_info("⚠️  Discord has no user allowlist - anyone can use your bot!")
-                if prompt_yes_no("Add allowed users now?", True):
-                    print_info("   To find Discord ID: Enable Developer Mode, right-click name → Copy ID")
-                    allowed_users = prompt("Allowed user IDs (comma-separated)")
-                    if allowed_users:
-                        cleaned_ids = _clean_discord_user_ids(allowed_users)
-                        save_env_value("DISCORD_ALLOWED_USERS", ",".join(cleaned_ids))
-                        print_success("Discord allowlist configured")
-            return
-
-    print_info("Create a bot at https://discord.com/developers/applications")
-    token = prompt("Discord bot token", password=True)
-    if not token:
-        return
-    save_env_value("DISCORD_BOT_TOKEN", token)
-    print_success("Discord token saved")
-
-    print()
-    print_info("🔒 Security: Restrict who can use your bot")
-    print_info("   To find your Discord user ID:")
-    print_info("   1. Enable Developer Mode in Discord settings")
-    print_info("   2. Right-click your name → Copy ID")
-    print()
-    print_info("   You can also use Discord usernames (resolved on gateway start).")
-    print()
-    allowed_users = prompt(
-        "Allowed user IDs or usernames (comma-separated, leave empty for open access)"
-    )
-    if allowed_users:
-        cleaned_ids = _clean_discord_user_ids(allowed_users)
-        save_env_value("DISCORD_ALLOWED_USERS", ",".join(cleaned_ids))
-        print_success("Discord allowlist configured")
-    else:
-        print_info("⚠️  No allowlist set - anyone in servers with your bot can use it!")
-
-    print()
-    print_info("📬 Home Channel: where Hermes delivers cron job results,")
-    print_info("   cross-platform messages, and notifications.")
-    print_info("   To get a channel ID: right-click a channel → Copy Channel ID")
-    print_info("   (requires Developer Mode in Discord settings)")
-    print_info("   You can also set this later by typing /set-home in a Discord channel.")
-    home_channel = prompt("Home channel ID (leave empty to set later with /set-home)")
-    if home_channel:
-        save_env_value("DISCORD_HOME_CHANNEL", home_channel)
-
-
-def _clean_discord_user_ids(raw: str) -> list:
-    """Strip common Discord mention prefixes from a comma-separated ID string."""
-    cleaned = []
-    for uid in raw.replace(" ", "").split(","):
-        uid = uid.strip()
-        if uid.startswith("<@") and uid.endswith(">"):
-            uid = uid.lstrip("<@!").rstrip(">")
-        if uid.lower().startswith("user:"):
-            uid = uid[5:]
-        if uid:
-            cleaned.append(uid)
-    return cleaned
-
-
-def _setup_slack():
-    """Configure Slack bot credentials."""
-    print_header("Slack")
-    existing = get_env_value("SLACK_BOT_TOKEN")
-    if existing:
-        print_info("Slack: already configured")
-        if not prompt_yes_no("Reconfigure Slack?", False):
-            return
-
-    print_info("Steps to create a Slack app:")
-    print_info("   1. Go to https://api.slack.com/apps → Create New App (from scratch)")
-    print_info("   2. Enable Socket Mode: Settings → Socket Mode → Enable")
-    print_info("      • Create an App-Level Token with 'connections:write' scope")
-    print_info("   3. Add Bot Token Scopes: Features → OAuth & Permissions")
-    print_info("      Required scopes: chat:write, app_mentions:read,")
-    print_info("      channels:history, channels:read, im:history,")
-    print_info("      im:read, im:write, users:read, files:read, files:write")
-    print_info("      Optional for private channels: groups:history")
-    print_info("   4. Subscribe to Events: Features → Event Subscriptions → Enable")
-    print_info("      Required events: message.im, message.channels, app_mention")
-    print_info("      Optional for private channels: message.groups")
-    print_warning("   ⚠ Without message.channels the bot will ONLY work in DMs,")
-    print_warning("     not public channels.")
-    print_info("   5. Install to Workspace: Settings → Install App")
-    print_info("   6. Reinstall the app after any scope or event changes")
-    print_info("   7. After installing, invite the bot to channels: /invite @YourBot")
-    print()
-    print_info("   Full guide: https://hermes-agent.nousresearch.com/docs/user-guide/messaging/slack/")
-    print()
-    bot_token = prompt("Slack Bot Token (xoxb-...)", password=True)
-    if not bot_token:
-        return
-    save_env_value("SLACK_BOT_TOKEN", bot_token)
-    app_token = prompt("Slack App Token (xapp-...)", password=True)
-    if app_token:
-        save_env_value("SLACK_APP_TOKEN", app_token)
-    print_success("Slack tokens saved")
-
-    print()
-    print_info("🔒 Security: Restrict who can use your bot")
-    print_info("   To find a Member ID: click a user's name → View full profile → ⋮ → Copy member ID")
-    print()
-    allowed_users = prompt(
-        "Allowed user IDs (comma-separated, leave empty to deny everyone except paired users)"
-    )
-    if allowed_users:
-        save_env_value("SLACK_ALLOWED_USERS", allowed_users.replace(" ", ""))
-        print_success("Slack allowlist configured")
-    else:
-        print_warning("⚠️  No Slack allowlist set - unpaired users will be denied by default.")
-        print_info("   Set SLACK_ALLOW_ALL_USERS=true or GATEWAY_ALLOW_ALL_USERS=true only if you intentionally want open workspace access.")
-
-
-def _setup_matrix():
-    """Configure Matrix credentials."""
-    print_header("Matrix")
-    existing = get_env_value("MATRIX_ACCESS_TOKEN") or get_env_value("MATRIX_PASSWORD")
-    if existing:
-        print_info("Matrix: already configured")
-        if not prompt_yes_no("Reconfigure Matrix?", False):
-            return
-
-    print_info("Works with any Matrix homeserver (Synapse, Conduit, Dendrite, or matrix.org).")
-    print_info("   1. Create a bot user on your homeserver, or use your own account")
-    print_info("   2. Get an access token from Element, or provide user ID + password")
-    print()
-    homeserver = prompt("Homeserver URL (e.g. https://matrix.example.org)")
-    if homeserver:
-        save_env_value("MATRIX_HOMESERVER", homeserver.rstrip("/"))
-
-    print()
-    print_info("Auth: provide an access token (recommended), or user ID + password.")
-    token = prompt("Access token (leave empty for password login)", password=True)
-    if token:
-        save_env_value("MATRIX_ACCESS_TOKEN", token)
-        user_id = prompt("User ID (@bot:server — optional, will be auto-detected)")
-        if user_id:
-            save_env_value("MATRIX_USER_ID", user_id)
-        print_success("Matrix access token saved")
-    else:
-        user_id = prompt("User ID (@bot:server)")
-        if user_id:
-            save_env_value("MATRIX_USER_ID", user_id)
-        password = prompt("Password", password=True)
-        if password:
-            save_env_value("MATRIX_PASSWORD", password)
-            print_success("Matrix credentials saved")
-
-    if token or get_env_value("MATRIX_PASSWORD"):
-        print()
-        want_e2ee = prompt_yes_no("Enable end-to-end encryption (E2EE)?", False)
-        if want_e2ee:
-            save_env_value("MATRIX_ENCRYPTION", "true")
-            print_success("E2EE enabled")
-
-        matrix_pkg = "mautrix[encryption]" if want_e2ee else "mautrix"
-        try:
-            __import__("mautrix")
-        except ImportError:
-            print_info(f"Installing {matrix_pkg}...")
-            import subprocess
-            uv_bin = shutil.which("uv")
-            if uv_bin:
-                result = subprocess.run(
-                    [uv_bin, "pip", "install", "--python", sys.executable, matrix_pkg],
-                    capture_output=True, text=True,
-                )
-            else:
-                result = subprocess.run(
-                    [sys.executable, "-m", "pip", "install", matrix_pkg],
-                    capture_output=True, text=True,
-                )
-            if result.returncode == 0:
-                print_success(f"{matrix_pkg} installed")
-            else:
-                print_warning(f"Install failed — run manually: pip install '{matrix_pkg}'")
-                if result.stderr:
-                    print_info(f"  Error: {result.stderr.strip().splitlines()[-1]}")
-
-        print()
-        print_info("🔒 Security: Restrict who can use your bot")
-        print_info("   Matrix user IDs look like @username:server")
-        print()
-        allowed_users = prompt("Allowed user IDs (comma-separated, leave empty for open access)")
-        if allowed_users:
-            save_env_value("MATRIX_ALLOWED_USERS", allowed_users.replace(" ", ""))
-            print_success("Matrix allowlist configured")
-        else:
-            print_info("⚠️  No allowlist set - anyone who can message the bot can use it!")
-
-        print()
-        print_info("📬 Home Room: where Hermes delivers cron job results and notifications.")
-        print_info("   Room IDs look like !abc123:server (shown in Element room settings)")
-        print_info("   You can also set this later by typing /set-home in a Matrix room.")
-        home_room = prompt("Home room ID (leave empty to set later with /set-home)")
-        if home_room:
-            save_env_value("MATRIX_HOME_ROOM", home_room)
-
-
-def _setup_mattermost():
-    """Configure Mattermost bot credentials."""
-    print_header("Mattermost")
-    existing = get_env_value("MATTERMOST_TOKEN")
-    if existing:
-        print_info("Mattermost: already configured")
-        if not prompt_yes_no("Reconfigure Mattermost?", False):
-            return
-
-    print_info("Works with any self-hosted Mattermost instance.")
-    print_info("   1. In Mattermost: Integrations → Bot Accounts → Add Bot Account")
-    print_info("   2. Copy the bot token")
-    print()
-    mm_url = prompt("Mattermost server URL (e.g. https://mm.example.com)")
-    if mm_url:
-        save_env_value("MATTERMOST_URL", mm_url.rstrip("/"))
-    token = prompt("Bot token", password=True)
-    if not token:
-        return
-    save_env_value("MATTERMOST_TOKEN", token)
-    print_success("Mattermost token saved")
-
-    print()
-    print_info("🔒 Security: Restrict who can use your bot")
-    print_info("   To find your user ID: click your avatar → Profile")
-    print_info("   or use the API: GET /api/v4/users/me")
-    print()
-    allowed_users = prompt("Allowed user IDs (comma-separated, leave empty for open access)")
-    if allowed_users:
-        save_env_value("MATTERMOST_ALLOWED_USERS", allowed_users.replace(" ", ""))
-        print_success("Mattermost allowlist configured")
-    else:
-        print_info("⚠️  No allowlist set - anyone who can message the bot can use it!")
-
-    print()
-    print_info("📬 Home Channel: where Hermes delivers cron job results and notifications.")
-    print_info("   To get a channel ID: click channel name → View Info → copy the ID")
-    print_info("   You can also set this later by typing /set-home in a Mattermost channel.")
-    home_channel = prompt("Home channel ID (leave empty to set later with /set-home)")
-    if home_channel:
-        save_env_value("MATTERMOST_HOME_CHANNEL", home_channel)
-
-
-def _setup_whatsapp():
-    """Configure WhatsApp bridge."""
-    print_header("WhatsApp")
-    existing = get_env_value("WHATSAPP_ENABLED")
-    if existing:
-        print_info("WhatsApp: already enabled")
-        return
-
-    print_info("WhatsApp connects via a built-in bridge (Baileys).")
-    print_info("Requires Node.js. Run 'hermes whatsapp' for guided setup.")
-    print()
-    if prompt_yes_no("Enable WhatsApp now?", True):
-        save_env_value("WHATSAPP_ENABLED", "true")
-        print_success("WhatsApp enabled")
-        print_info("Run 'hermes whatsapp' to choose your mode (separate bot number")
-        print_info("or personal self-chat) and pair via QR code.")
-
-
-def _setup_weixin():
-    """Configure Weixin (personal WeChat) via iLink Bot API QR login."""
-    from hermes_cli.gateway import _setup_weixin as _gateway_setup_weixin
-    _gateway_setup_weixin()
-
-
-def _setup_signal():
-    """Configure Signal via gateway setup."""
-    from hermes_cli.gateway import _setup_signal as _gateway_setup_signal
-    _gateway_setup_signal()
-
-
-def _setup_email():
-    """Configure Email via gateway setup."""
-    from hermes_cli.gateway import _setup_email as _gateway_setup_email
-    _gateway_setup_email()
-
-
-def _setup_sms():
-    """Configure SMS (Twilio) via gateway setup."""
-    from hermes_cli.gateway import _setup_sms as _gateway_setup_sms
-    _gateway_setup_sms()
-
-
-def _setup_dingtalk():
-    """Configure DingTalk via gateway setup."""
-    from hermes_cli.gateway import _setup_dingtalk as _gateway_setup_dingtalk
-    _gateway_setup_dingtalk()
-
-
-def _setup_feishu():
-    """Configure Feishu / Lark via gateway setup."""
-    from hermes_cli.gateway import _setup_feishu as _gateway_setup_feishu
-    _gateway_setup_feishu()
-
-
-def _setup_wecom():
-    """Configure WeCom (Enterprise WeChat) via gateway setup."""
-    from hermes_cli.gateway import _setup_wecom as _gateway_setup_wecom
-    _gateway_setup_wecom()
-
-
-def _setup_wecom_callback():
-    """Configure WeCom Callback (self-built app) via gateway setup."""
-    from hermes_cli.gateway import _setup_wecom_callback as _gw_setup
-    _gw_setup()
-
-
-
-
-def _setup_bluebubbles():
-    """Configure BlueBubbles iMessage gateway."""
-    print_header("BlueBubbles (iMessage)")
-    existing = get_env_value("BLUEBUBBLES_SERVER_URL")
-    if existing:
-        print_info("BlueBubbles: already configured")
-        if not prompt_yes_no("Reconfigure BlueBubbles?", False):
-            return
-
-    print_info("Connects Hermes to iMessage via BlueBubbles — a free, open-source")
-    print_info("macOS server that bridges iMessage to any device.")
-    print_info("   Requires a Mac running BlueBubbles Server v1.0.0+")
-    print_info("   Download: https://bluebubbles.app/")
-    print()
-    print_info("In BlueBubbles Server → Settings → API, note your Server URL and Password.")
-    print()
-
-    server_url = prompt("BlueBubbles server URL (e.g. http://192.168.1.10:1234)")
-    if not server_url:
-        print_warning("Server URL is required — skipping BlueBubbles setup")
-        return
-    save_env_value("BLUEBUBBLES_SERVER_URL", server_url.rstrip("/"))
-
-    password = prompt("BlueBubbles server password", password=True)
-    if not password:
-        print_warning("Password is required — skipping BlueBubbles setup")
-        return
-    save_env_value("BLUEBUBBLES_PASSWORD", password)
-    print_success("BlueBubbles credentials saved")
-
-    print()
-    print_info("🔒 Security: Restrict who can message your bot")
-    print_info("   Use iMessage addresses: email (user@icloud.com) or phone (+15551234567)")
-    print()
-    allowed_users = prompt("Allowed iMessage addresses (comma-separated, leave empty for open access)")
-    if allowed_users:
-        save_env_value("BLUEBUBBLES_ALLOWED_USERS", allowed_users.replace(" ", ""))
-        print_success("BlueBubbles allowlist configured")
-    else:
-        print_info("⚠️  No allowlist set — anyone who can iMessage you can use the bot!")
-
-    print()
-    print_info("📬 Home Channel: phone or email for cron job delivery and notifications.")
-    print_info("   You can also set this later with /set-home in your iMessage chat.")
-    home_channel = prompt("Home channel address (leave empty to set later)")
-    if home_channel:
-        save_env_value("BLUEBUBBLES_HOME_CHANNEL", home_channel)
-
-    print()
-    print_info("Advanced settings (defaults are fine for most setups):")
-    if prompt_yes_no("Configure webhook listener settings?", False):
-        webhook_port = prompt("Webhook listener port (default: 8645)")
-        if webhook_port:
-            try:
-                save_env_value("BLUEBUBBLES_WEBHOOK_PORT", str(int(webhook_port)))
-                print_success(f"Webhook port set to {webhook_port}")
-            except ValueError:
-                print_warning("Invalid port number, using default 8645")
-
-    print()
-    print_info("Requires the BlueBubbles Private API helper for typing indicators,")
-    print_info("read receipts, and tapback reactions. Basic messaging works without it.")
-    print_info("   Install: https://docs.bluebubbles.app/helper-bundle/installation")
-
-
-def _setup_qqbot():
-    """Configure QQ Bot (Official API v2) via gateway setup."""
-    from hermes_cli.gateway import _setup_qqbot as _gateway_setup_qqbot
-    _gateway_setup_qqbot()
-
-
-
-
-# Platform registry for the gateway checklist
-_GATEWAY_PLATFORMS = [
-    ("Telegram", "TELEGRAM_BOT_TOKEN", _setup_telegram),
-    ("Discord", "DISCORD_BOT_TOKEN", _setup_discord),
-    ("Slack", "SLACK_BOT_TOKEN", _setup_slack),
-    ("Signal", "SIGNAL_HTTP_URL", _setup_signal),
-    ("Email", "EMAIL_ADDRESS", _setup_email),
-    ("SMS (Twilio)", "TWILIO_ACCOUNT_SID", _setup_sms),
-    ("Matrix", "MATRIX_ACCESS_TOKEN", _setup_matrix),
-    ("Mattermost", "MATTERMOST_TOKEN", _setup_mattermost),
-    ("WhatsApp", "WHATSAPP_ENABLED", _setup_whatsapp),
-    ("DingTalk", "DINGTALK_CLIENT_ID", _setup_dingtalk),
-    ("Feishu / Lark", "FEISHU_APP_ID", _setup_feishu),
-    ("WeCom (Enterprise WeChat)", "WECOM_BOT_ID", _setup_wecom),
-    ("WeCom Callback (Self-Built App)", "WECOM_CALLBACK_CORP_ID", _setup_wecom_callback),
-    ("Weixin (WeChat)", "WEIXIN_ACCOUNT_ID", _setup_weixin),
-    ("BlueBubbles (iMessage)", "BLUEBUBBLES_SERVER_URL", _setup_bluebubbles),
-    ("QQ Bot", "QQ_APP_ID", _setup_qqbot),
-]
-
-
 def setup_gateway(config: dict):
-    """Configure messaging platform integrations."""
-    print_header("Messaging Platforms")
-    print_info("Connect to messaging platforms to chat with Hermes from anywhere.")
-    print_info("Toggle with Space, confirm with Enter.")
-    print()
-
-    # Build checklist items, pre-selecting already-configured platforms
-    items = []
-    pre_selected = []
-    for i, (name, env_var, _func) in enumerate(_GATEWAY_PLATFORMS):
-        # Matrix has two possible env vars
-        is_configured = bool(get_env_value(env_var))
-        if name == "Matrix" and not is_configured:
-            is_configured = bool(get_env_value("MATRIX_PASSWORD"))
-        label = f"{name}  (configured)" if is_configured else name
-        items.append(label)
-        if is_configured:
-            pre_selected.append(i)
-
-    selected = prompt_checklist("Select platforms to configure:", items, pre_selected)
-
-    if not selected:
-        print_info("No platforms selected. Run 'hermes setup gateway' later to configure.")
-        return
-
-    for idx in selected:
-        name, _env_var, setup_func = _GATEWAY_PLATFORMS[idx]
-        setup_func()
-
-    # ── Gateway Service Setup ──
-    any_messaging = (
-        get_env_value("TELEGRAM_BOT_TOKEN")
-        or get_env_value("DISCORD_BOT_TOKEN")
-        or get_env_value("SLACK_BOT_TOKEN")
-        or get_env_value("SIGNAL_HTTP_URL")
-        or get_env_value("EMAIL_ADDRESS")
-        or get_env_value("TWILIO_ACCOUNT_SID")
-        or get_env_value("MATTERMOST_TOKEN")
-        or get_env_value("MATRIX_ACCESS_TOKEN")
-        or get_env_value("MATRIX_PASSWORD")
-        or get_env_value("WHATSAPP_ENABLED")
-        or get_env_value("DINGTALK_CLIENT_ID")
-        or get_env_value("FEISHU_APP_ID")
-        or get_env_value("WECOM_BOT_ID")
-        or get_env_value("WEIXIN_ACCOUNT_ID")
-        or get_env_value("BLUEBUBBLES_SERVER_URL")
-        or get_env_value("QQ_APP_ID")
-    )
-    if any_messaging:
-        print()
-        print_info("━" * 50)
-        print_success("Messaging platforms configured!")
-
-        # Check if any home channels are missing
-        missing_home = []
-        if get_env_value("TELEGRAM_BOT_TOKEN") and not get_env_value(
-            "TELEGRAM_HOME_CHANNEL"
-        ):
-            missing_home.append("Telegram")
-        if get_env_value("DISCORD_BOT_TOKEN") and not get_env_value(
-            "DISCORD_HOME_CHANNEL"
-        ):
-            missing_home.append("Discord")
-        if get_env_value("SLACK_BOT_TOKEN") and not get_env_value("SLACK_HOME_CHANNEL"):
-            missing_home.append("Slack")
-        if get_env_value("BLUEBUBBLES_SERVER_URL") and not get_env_value("BLUEBUBBLES_HOME_CHANNEL"):
-            missing_home.append("BlueBubbles")
-        if get_env_value("QQ_APP_ID") and not (
-            get_env_value("QQBOT_HOME_CHANNEL") or get_env_value("QQ_HOME_CHANNEL")
-        ):
-            missing_home.append("QQBot")
-
-        if missing_home:
-            print()
-            print_warning(f"No home channel set for: {', '.join(missing_home)}")
-            print_info("   Without a home channel, cron jobs and cross-platform")
-            print_info("   messages can't be delivered to those platforms.")
-            print_info("   Set one later with /set-home in your chat, or:")
-            for plat in missing_home:
-                print_info(
-                    f"     hermes config set {plat.upper()}_HOME_CHANNEL <channel_id>"
-                )
-
-        # Offer to install the gateway as a system service
-        import platform as _platform
-
-        _is_linux = _platform.system() == "Linux"
-        _is_macos = _platform.system() == "Darwin"
-
-        from hermes_cli.gateway import (
-            _is_service_installed,
-            _is_service_running,
-            supports_systemd_services,
-            has_conflicting_systemd_units,
-            has_legacy_hermes_units,
-            install_linux_gateway_from_setup,
-            print_systemd_scope_conflict_warning,
-            print_legacy_unit_warning,
-            systemd_start,
-            systemd_restart,
-            launchd_install,
-            launchd_start,
-            launchd_restart,
-        )
-
-        service_installed = _is_service_installed()
-        service_running = _is_service_running()
-        supports_systemd = supports_systemd_services()
-        supports_service_manager = supports_systemd or _is_macos
-
-        print()
-        if supports_systemd and has_conflicting_systemd_units():
-            print_systemd_scope_conflict_warning()
-            print()
-
-        if supports_systemd and has_legacy_hermes_units():
-            print_legacy_unit_warning()
-            print()
-
-        if service_running:
-            if prompt_yes_no("  Restart the gateway to pick up changes?", True):
-                try:
-                    if supports_systemd:
-                        systemd_restart()
-                    elif _is_macos:
-                        launchd_restart()
-                except Exception as e:
-                    print_error(f"  Restart failed: {e}")
-        elif service_installed:
-            if prompt_yes_no("  Start the gateway service?", True):
-                try:
-                    if supports_systemd:
-                        systemd_start()
-                    elif _is_macos:
-                        launchd_start()
-                except Exception as e:
-                    print_error(f"  Start failed: {e}")
-        elif supports_service_manager:
-            svc_name = "systemd" if supports_systemd else "launchd"
-            if prompt_yes_no(
-                f"  Install the gateway as a {svc_name} service? (runs in background, starts on boot)",
-                True,
-            ):
-                try:
-                    installed_scope = None
-                    did_install = False
-                    if supports_systemd:
-                        installed_scope, did_install = install_linux_gateway_from_setup(force=False)
-                    else:
-                        launchd_install(force=False)
-                        did_install = True
-                    print()
-                    if did_install and prompt_yes_no("  Start the service now?", True):
-                        try:
-                            if supports_systemd:
-                                systemd_start(system=installed_scope == "system")
-                            elif _is_macos:
-                                launchd_start()
-                        except Exception as e:
-                            print_error(f"  Start failed: {e}")
-                except Exception as e:
-                    print_error(f"  Install failed: {e}")
-                    print_info("  You can try manually: hermes gateway install")
-            else:
-                print_info("  You can install later: hermes gateway install")
-                if supports_systemd:
-                    print_info("  Or as a boot-time service: sudo hermes gateway install --system")
-                print_info("  Or run in foreground:  hermes gateway")
-        else:
-            from hermes_constants import is_container
-            if is_container():
-                print_info("Start the gateway to bring your bots online:")
-                print_info("   hermes gateway run          # Run as container main process")
-                print_info("")
-                print_info("For automatic restarts, use a Docker restart policy:")
-                print_info("   docker run --restart unless-stopped ...")
-                print_info("   docker restart <container>  # Manual restart")
-            else:
-                print_info("Start the gateway to bring your bots online:")
-                print_info("   hermes gateway              # Run in foreground")
-
-        print_info("━" * 50)
-
-
-# =============================================================================
-# Section 5: Tool Configuration (delegates to unified tools_config.py)
-# =============================================================================
+    """Inform the user that messaging gateway setup is retired in this build."""
+    print_header("Gateway Setup")
+    print_info("The enterprise build no longer supports public messaging or webhook setup.")
+    print_info("Supported runtime surfaces are the CLI and api_server only.")
+    print_info("Use 'hermes tools', 'hermes model', and config.yaml to manage the retained enterprise features.")
 
 
 def setup_tools(config: dict, first_install: bool = False):
@@ -2790,7 +2102,7 @@ SETUP_SECTIONS = [
     ("model", "Model & Provider", setup_model_provider),
     ("tts", "Text-to-Speech", setup_tts),
     ("terminal", "Terminal Backend", setup_terminal_backend),
-    ("gateway", "Messaging Platforms (Gateway)", setup_gateway),
+    ("gateway", "Gateway Runtime", setup_gateway),
     ("tools", "Tools", setup_tools),
     ("agent", "Agent Settings", setup_agent_settings),
 ]
@@ -2815,7 +2127,7 @@ def run_setup_wizard(args):
       hermes setup model     — just model/provider
       hermes setup tts       — just text-to-speech
       hermes setup terminal  — just terminal backend
-      hermes setup gateway   — just messaging platforms
+      hermes setup gateway   — gateway runtime notice
       hermes setup tools     — just tool configuration
       hermes setup agent     — just agent settings
     """
@@ -2932,7 +2244,7 @@ def run_setup_wizard(args):
             "Full Setup - reconfigure everything",
             "Model & Provider",
             "Terminal Backend",
-            "Messaging Platforms (Gateway)",
+            "Gateway Runtime",
             "Tools",
             "Agent Settings",
             "Exit",
@@ -2971,7 +2283,7 @@ def run_setup_wizard(args):
             config = load_config()
 
         setup_mode = prompt_choice("How would you like to set up Hermes?", [
-            "Quick setup — provider, model & messaging (recommended)",
+            "Quick setup — provider and model (recommended)",
             "Full setup — configure everything",
         ], 0)
 
@@ -3006,8 +2318,8 @@ def run_setup_wizard(args):
     if not (migration_ran and _skip_configured_section(config, "agent", "Agent Settings")):
         setup_agent_settings(config)
 
-    # Section 4: Messaging Platforms
-    if not (migration_ran and _skip_configured_section(config, "gateway", "Messaging Platforms")):
+    # Section 4: Gateway Runtime
+    if not (migration_ran and _skip_configured_section(config, "gateway", "Gateway Runtime")):
         setup_gateway(config)
 
     # Section 5: Tools
@@ -3066,13 +2378,13 @@ def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
 
     save_config(config)
 
-    # Step 3: Offer messaging gateway setup
+    # Step 3: Enterprise build skips retired messaging gateway setup
     print()
     gateway_choice = prompt_choice(
-        "Connect a messaging platform? (Telegram, Discord, etc.)",
+        "Review retired gateway setup?",
         [
-            "Set up messaging now (recommended)",
-            "Skip — set up later with 'hermes setup gateway'",
+            "Show enterprise gateway notice",
+            "Skip — review later with 'hermes setup gateway'",
         ],
         0,
     )
@@ -3086,7 +2398,7 @@ def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):
     print()
     print_info("  Configure all settings:    hermes setup")
     if gateway_choice != 0:
-        print_info("  Connect Telegram/Discord:  hermes setup gateway")
+        print_info("  API server runtime:       hermes gateway run")
     print()
 
     _print_setup_summary(config, hermes_home)
@@ -3155,9 +2467,9 @@ def _run_quick_setup(config: dict, hermes_home):
             else:
                 print_warning(f"  Skipped {var['name']}")
 
-    # Split missing optional vars by category
+    # Split missing optional vars by category.
     missing_tools = [v for v in missing_optional if v.get("category") == "tool"]
-    missing_messaging = [
+    ignored_messaging = [
         v
         for v in missing_optional
         if v.get("category") == "messaging" and not v.get("advanced")
@@ -3183,65 +2495,12 @@ def _run_quick_setup(config: dict, hermes_home):
             var = missing_tools[idx]
             _prompt_api_key(var)
 
-    # ── Messaging platforms (checklist then prompt for selected) ──
-    if missing_messaging:
+    # ── Legacy messaging env vars are intentionally not surfaced ──
+    if ignored_messaging:
         print()
-        print_header("Messaging Platforms")
-        print_info("Connect Hermes to messaging apps to chat from anywhere.")
-        print_info("You can configure these later with 'hermes setup gateway'.")
-
-        # Group by platform (preserving order)
-        platform_order = []
-        platforms = {}
-        for var in missing_messaging:
-            name = var["name"]
-            if "TELEGRAM" in name:
-                plat = "Telegram"
-            elif "DISCORD" in name:
-                plat = "Discord"
-            elif "SLACK" in name:
-                plat = "Slack"
-            else:
-                continue
-            if plat not in platforms:
-                platform_order.append(plat)
-            platforms.setdefault(plat, []).append(var)
-
-        platform_labels = [
-            {
-                "Telegram": "📱 Telegram",
-                "Discord": "💬 Discord",
-                "Slack": "💼 Slack",
-            }.get(p, p)
-            for p in platform_order
-        ]
-
-        selected_indices = prompt_checklist(
-            "Which platforms would you like to set up?",
-            platform_labels,
-        )
-
-        for idx in selected_indices:
-            plat = platform_order[idx]
-            vars_list = platforms[plat]
-            emoji = {"Telegram": "📱", "Discord": "💬", "Slack": "💼"}.get(plat, "")
-            print()
-            print(color(f"  ─── {emoji} {plat} ───", Colors.CYAN))
-            print()
-            for var in vars_list:
-                print_info(f"  {var.get('description', '')}")
-                if var.get("url"):
-                    print_info(f"  {var['url']}")
-                if var.get("password"):
-                    value = prompt(f"  {var.get('prompt', var['name'])}", password=True)
-                else:
-                    value = prompt(f"  {var.get('prompt', var['name'])}")
-                if value:
-                    save_env_value(var["name"], value)
-                    print_success("  ✓ Saved")
-                else:
-                    print_warning("  Skipped")
-                print()
+        print_header("Retired Messaging Settings")
+        print_info("Legacy messaging platform credentials are ignored in the enterprise build.")
+        print_info("Use 'hermes gateway run' for the retained API server runtime.")
 
     # Handle missing config fields
     if missing_config:
@@ -3258,3 +2517,4 @@ def _run_quick_setup(config: dict, hermes_home):
 
     # Jump to summary
     _print_setup_summary(config, hermes_home)
+

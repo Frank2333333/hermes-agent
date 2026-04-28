@@ -1,4 +1,4 @@
-"""Tests for model_tools.py â€?function call dispatch, agent-loop interception, legacy toolsets."""
+"""Tests for model_tools.py éˆ¥?function call dispatch, agent-loop interception, legacy toolsets."""
 
 import json
 from unittest.mock import call, patch
@@ -147,7 +147,7 @@ class TestPreToolCallBlocking:
         assert notifications == []
 
     def test_invalid_hook_returns_do_not_block(self, monkeypatch):
-        """Malformed hook returns should be ignored â€?tool executes normally."""
+        """Malformed hook returns should be ignored éˆ¥?tool executes normally."""
         def fake_invoke_hook(hook_name, **kwargs):
             if hook_name == "pre_tool_call":
                 return [
@@ -180,7 +180,7 @@ class TestPreToolCallBlocking:
                              skip_pre_tool_call_hook=True)
 
         # Hook still fires for observer notification, but get_pre_tool_call_block_message
-        # is not called â€?invoke_hook fires directly in the skip=True branch.
+        # is not called éˆ¥?invoke_hook fires directly in the skip=True branch.
         assert "pre_tool_call" in hook_calls
         assert "post_tool_call" in hook_calls
 
@@ -192,9 +192,9 @@ class TestPreToolCallBlocking:
 class TestLegacyToolsetMap:
     def test_expected_legacy_names(self):
         expected = [
-            "web_tools", "terminal_tools", "vision_tools", "moa_tools",
+            "web_tools", "terminal_tools", "vision_tools",
             "image_tools", "skills_tools", "browser_tools", "cronjob_tools",
-            "rl_tools", "file_tools", "tts_tools",
+            "file_tools", "tts_tools",
         ]
         for name in expected:
             assert name in _LEGACY_TOOLSET_MAP, f"Missing legacy toolset: {name}"
@@ -231,3 +231,4 @@ class TestBackwardCompat:
     def test_tool_to_toolset_map(self):
         assert isinstance(TOOL_TO_TOOLSET_MAP, dict)
         assert len(TOOL_TO_TOOLSET_MAP) > 0
+

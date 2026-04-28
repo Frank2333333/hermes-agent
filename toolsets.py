@@ -26,8 +26,7 @@ Usage:
 from typing import List, Dict, Any, Set, Optional
 
 
-# Shared tool list for CLI and all messaging platform toolsets.
-# Edit this once to update all platforms simultaneously.
+# Shared tool list for the supported enterprise entrypoints.
 _HERMES_CORE_TOOLS = [
     # Web
     "web_extract",
@@ -94,8 +93,8 @@ TOOLSETS = {
     },
     
     "moa": {
-        "description": "Advanced reasoning and problem-solving tools",
-        "tools": ["mixture_of_agents"],
+        "description": "Mixture-of-agents is disabled in the enterprise build",
+        "tools": [],
         "includes": []
     },
     
@@ -129,14 +128,26 @@ TOOLSETS = {
     },
     
     "rl": {
-        "description": "RL training tools for running reinforcement learning on Tinker-Atropos",
-        "tools": [
-            "rl_list_environments", "rl_select_environment",
-            "rl_get_current_config", "rl_edit_config",
-            "rl_start_training", "rl_check_status",
-            "rl_stop_training", "rl_get_results",
-            "rl_list_runs", "rl_test_inference"
-        ],
+        "description": "RL training is disabled in the enterprise build",
+        "tools": [],
+        "includes": []
+    },
+
+    "homeassistant": {
+        "description": "Home Assistant integration is disabled in the enterprise build",
+        "tools": [],
+        "includes": []
+    },
+
+    "feishu_doc": {
+        "description": "Feishu document integration is disabled in the enterprise build",
+        "tools": [],
+        "includes": []
+    },
+
+    "feishu_drive": {
+        "description": "Feishu drive integration is disabled in the enterprise build",
+        "tools": [],
         "includes": []
     },
     
@@ -206,9 +217,7 @@ TOOLSETS = {
     },
     
     # ==========================================================================
-    # Full Hermes toolsets (CLI + messaging platforms)
-    #
-    # All internal entrypoints share the same core tools.
+    # Full Hermes toolsets for the supported enterprise entrypoints.
     # ==========================================================================
 
     "hermes-acp": {

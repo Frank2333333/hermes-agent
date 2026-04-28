@@ -42,11 +42,6 @@ class TestHermesApiServerToolset:
                       "browser_press"]:
             assert tool in tools, f"Missing browser tool: {tool}"
 
-    def test_toolset_includes_homeassistant_tools(self):
-        tools = resolve_toolset("hermes-api-server")
-        for tool in ["ha_list_entities", "ha_get_state", "ha_list_services", "ha_call_service"]:
-            assert tool in tools, f"Missing HA tool: {tool}"
-
     def test_toolset_excludes_clarify(self):
         tools = resolve_toolset("hermes-api-server")
         assert "clarify" not in tools
@@ -54,6 +49,17 @@ class TestHermesApiServerToolset:
     def test_toolset_excludes_send_message(self):
         tools = resolve_toolset("hermes-api-server")
         assert "send_message" not in tools
+
+    def test_toolset_excludes_retired_enterprise_out_of_scope_toolsets(self):
+        tools = resolve_toolset("hermes-api-server")
+        for retired in [
+            "mixture_of_agents",
+            "ha_list_entities",
+            "ha_get_state",
+            "ha_list_services",
+            "ha_call_service",
+        ]:
+            assert retired not in tools
 
     def test_toolset_excludes_text_to_speech(self):
         tools = resolve_toolset("hermes-api-server")

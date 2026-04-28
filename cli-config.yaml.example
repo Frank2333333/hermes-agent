@@ -39,8 +39,6 @@ browser:
 toolsets_by_platform:
   cli: [hermes-cli]
   api_server: [hermes-api-server]
-  webhook: [hermes-webhook]
-  homeassistant: [hermes-homeassistant]
 
 platforms:
   api_server:
@@ -48,12 +46,6 @@ platforms:
     extra:
       host: "127.0.0.1"
       port: 8080
-  webhook:
-    enabled: false
-    extra:
-      port: 8081
-  homeassistant:
-    enabled: false
 
 web:
   backend: "firecrawl"

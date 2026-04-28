@@ -2988,166 +2988,17 @@ def _setup_signal():
 
 
 def gateway_setup():
-    """Interactive setup for messaging platforms + gateway service."""
+    """Show the enterprise gateway setup notice."""
     if is_managed():
         managed_error("run gateway setup")
         return
 
     print()
-    print(color("┌─────────────────────────────────────────────────────────┐", Colors.MAGENTA))
-    print(color("│             ⚕ Gateway Setup                            │", Colors.MAGENTA))
-    print(color("├─────────────────────────────────────────────────────────┤", Colors.MAGENTA))
-    print(color("│  Configure messaging platforms and the gateway service. │", Colors.MAGENTA))
-    print(color("│  Press Ctrl+C at any time to exit.                     │", Colors.MAGENTA))
-    print(color("└─────────────────────────────────────────────────────────┘", Colors.MAGENTA))
-
-    # ── Gateway service status ──
-    print()
-    service_installed = _is_service_installed()
-    service_running = _is_service_running()
-
-    if supports_systemd_services() and has_conflicting_systemd_units():
-        print_systemd_scope_conflict_warning()
-        print()
-
-    if supports_systemd_services() and has_legacy_hermes_units():
-        print_legacy_unit_warning()
-        print()
-
-    if service_installed and service_running:
-        print_success("Gateway service is installed and running.")
-    elif service_installed:
-        print_warning("Gateway service is installed but not running.")
-        if prompt_yes_no("  Start it now?", True):
-            try:
-                if supports_systemd_services():
-                    systemd_start()
-                elif is_macos():
-                    launchd_start()
-            except subprocess.CalledProcessError as e:
-                print_error(f"  Failed to start: {e}")
-    else:
-        print_info("Gateway service is not installed yet.")
-        print_info("You'll be offered to install it after configuring platforms.")
-
-    # ── Platform configuration loop ──
-    while True:
-        print()
-        print_header("Messaging Platforms")
-
-        menu_items = []
-        for plat in _PLATFORMS:
-            status = _platform_status(plat)
-            menu_items.append(f"{plat['label']}  ({status})")
-        menu_items.append("Done")
-
-        choice = prompt_choice("Select a platform to configure:", menu_items, len(menu_items) - 1)
-
-        if choice == len(_PLATFORMS):
-            break
-
-        platform = _PLATFORMS[choice]
-
-        if platform["key"] == "whatsapp":
-            _setup_whatsapp()
-        elif platform["key"] == "signal":
-            _setup_signal()
-        elif platform["key"] == "weixin":
-            _setup_weixin()
-        elif platform["key"] == "dingtalk":
-            _setup_dingtalk()
-        elif platform["key"] == "feishu":
-            _setup_feishu()
-        elif platform["key"] == "qqbot":
-            _setup_qqbot()
-        elif platform["key"] == "wecom":
-            _setup_wecom()
-        else:
-            _setup_standard_platform(platform)
-
-    # ── Post-setup: offer to install/restart gateway ──
-    any_configured = any(
-        bool(get_env_value(p["token_var"]))
-        for p in _PLATFORMS
-        if p["key"] != "whatsapp"
-    ) or (get_env_value("WHATSAPP_ENABLED") or "").lower() == "true"
-
-    if any_configured:
-        print()
-        print(color("─" * 58, Colors.DIM))
-        service_installed = _is_service_installed()
-        service_running = _is_service_running()
-
-        if service_running:
-            if prompt_yes_no("  Restart the gateway to pick up changes?", True):
-                try:
-                    if supports_systemd_services():
-                        systemd_restart()
-                    elif is_macos():
-                        launchd_restart()
-                    else:
-                        stop_profile_gateway()
-                        print_info("Start manually: hermes gateway")
-                except subprocess.CalledProcessError as e:
-                    print_error(f"  Restart failed: {e}")
-        elif service_installed:
-            if prompt_yes_no("  Start the gateway service?", True):
-                try:
-                    if supports_systemd_services():
-                        systemd_start()
-                    elif is_macos():
-                        launchd_start()
-                except subprocess.CalledProcessError as e:
-                    print_error(f"  Start failed: {e}")
-        else:
-            print()
-            if supports_systemd_services() or is_macos():
-                platform_name = "systemd" if supports_systemd_services() else "launchd"
-                wsl_note = " (note: services may not survive WSL restarts)" if is_wsl() else ""
-                if prompt_yes_no(f"  Install the gateway as a {platform_name} service?{wsl_note} (runs in background, starts on boot)", True):
-                    try:
-                        installed_scope = None
-                        did_install = False
-                        if supports_systemd_services():
-                            installed_scope, did_install = install_linux_gateway_from_setup(force=False)
-                        else:
-                            launchd_install(force=False)
-                            did_install = True
-                        print()
-                        if did_install and prompt_yes_no("  Start the service now?", True):
-                            try:
-                                if supports_systemd_services():
-                                    systemd_start(system=installed_scope == "system")
-                                else:
-                                    launchd_start()
-                            except subprocess.CalledProcessError as e:
-                                print_error(f"  Start failed: {e}")
-                    except subprocess.CalledProcessError as e:
-                        print_error(f"  Install failed: {e}")
-                        print_info("  You can try manually: hermes gateway install")
-                else:
-                    print_info("  You can install later: hermes gateway install")
-                    if supports_systemd_services():
-                        print_info("  Or as a boot-time service: sudo hermes gateway install --system")
-                    print_info("  Or run in foreground:  hermes gateway run")
-            elif is_wsl():
-                print_info("  WSL detected but systemd is not running.")
-                print_info("  Run in foreground: hermes gateway run")
-                print_info("  For persistence:   tmux new -s hermes 'hermes gateway run'")
-                print_info("  To enable systemd: add systemd=true to /etc/wsl.conf, then 'wsl --shutdown'")
-            else:
-                if is_termux():
-                    from hermes_constants import display_hermes_home as _dhh
-                    print_info("  Termux does not use systemd/launchd services.")
-                    print_info("  Run in foreground: hermes gateway run")
-                    print_info(f"  Or start it manually in the background (best effort): nohup hermes gateway run >{_dhh()}/logs/gateway.log 2>&1 &")
-                else:
-                    print_info("  Service install not supported on this platform.")
-                    print_info("  Run in foreground: hermes gateway run")
-    else:
-        print()
-        print_info("No platforms configured. Run 'hermes gateway setup' when ready.")
-
+    print_header("Gateway Setup")
+    print_info("The enterprise build no longer supports public messaging platform setup.")
+    print_info("Supported runtime surfaces are the CLI and api_server only.")
+    print_info("Use 'hermes gateway run' to start the internal api_server runtime.")
+    print_info("Use config.yaml and .env.example for the retained enterprise configuration surface.")
     print()
 
 
@@ -3484,3 +3335,4 @@ def gateway_command(args):
             print("Legacy unit migration only applies to systemd-based Linux hosts.")
             return
         remove_legacy_hermes_units(interactive=not yes, dry_run=dry_run)
+

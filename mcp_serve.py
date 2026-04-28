@@ -1,16 +1,13 @@
 """
-Hermes MCP Server — expose messaging conversations as MCP tools.
+Hermes MCP Server - expose enterprise conversation state as MCP tools.
 
-Starts a stdio MCP server that lets any MCP client (Claude Code, Cursor, Codex,
-etc.) list conversations, read message history, send messages, poll for live
-events, and manage approval requests across all connected platforms.
+Starts a stdio MCP server that lets MCP clients list conversations, read
+message history, poll for live events, and manage approval requests for the
+retained CLI and API-server workflows.
 
-Matches OpenClaw's 9-tool MCP channel bridge surface:
+Current tool surface:
   conversations_list, conversation_get, messages_read, attachments_fetch,
-  events_poll, events_wait, messages_send, permissions_list_open,
-  permissions_respond
-
-Plus: channels_list (Hermes-specific extra)
+  events_poll, events_wait, permissions_list_open, permissions_respond
 
 Usage:
     hermes mcp serve
@@ -96,23 +93,12 @@ def _load_sessions_index() -> dict:
 
 
 def _load_channel_directory() -> dict:
-    """Load the cached channel directory for available targets."""
-    try:
-        from hermes_constants import get_hermes_home
-        directory_file = get_hermes_home() / "channel_directory.json"
-    except ImportError:
-        directory_file = Path(
-            os.environ.get("HERMES_HOME", Path.home() / ".hermes")
-        ) / "channel_directory.json"
+    """Compatibility stub for legacy tests and callers.
 
-    if not directory_file.exists():
-        return {}
-    try:
-        with open(directory_file, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        logger.debug("Failed to load channel_directory.json: %s", e)
-        return {}
+    The enterprise build does not expose outbound channel routing through the
+    MCP surface, so this always returns an empty directory.
+    """
+    return {}
 
 
 def _extract_message_content(msg: dict) -> str:
@@ -166,7 +152,7 @@ def _extract_attachments(msg: dict) -> List[dict]:
 
 
 # ---------------------------------------------------------------------------
-# Event Bridge — polls SessionDB for new messages, maintains event queue
+# Event Bridge �?polls SessionDB for new messages, maintains event queue
 # ---------------------------------------------------------------------------
 
 QUEUE_LIMIT = 1000
@@ -200,7 +186,7 @@ class EventBridge:
         self._last_poll_timestamps: Dict[str, float] = {}  # session_key -> unix timestamp
         # In-memory approval tracking (populated from events)
         self._pending_approvals: Dict[str, dict] = {}
-        # mtime cache — skip expensive work when files haven't changed
+        # mtime cache �?skip expensive work when files haven't changed
         self._sessions_json_mtime: float = 0.0
         self._state_db_mtime: float = 0.0
         self._cached_sessions_index: dict = {}
@@ -328,7 +314,7 @@ class EventBridge:
         """Check for new messages across all sessions.
 
         Uses mtime checks on sessions.json and state.db to skip work
-        when nothing has changed — makes 200ms polling essentially free.
+        when nothing has changed �?makes 200ms polling essentially free.
         """
         # Check if sessions.json has changed (mtime check is ~1μs)
         sessions_file = _get_sessions_dir() / "sessions.json"
@@ -354,7 +340,7 @@ class EventBridge:
             db_mtime = 0.0
 
         if db_mtime == self._state_db_mtime and sj_mtime == self._sessions_json_mtime:
-            return  # Nothing changed since last poll — skip entirely
+            return  # Nothing changed since last poll �?skip entirely
 
         self._state_db_mtime = db_mtime
         entries = self._cached_sessions_index
@@ -382,7 +368,7 @@ class EventBridge:
                     try:
                         return float(ts)
                     except ValueError:
-                        # ISO string — parse to epoch
+                        # ISO string �?parse to epoch
                         try:
                             from datetime import datetime
                             return datetime.fromisoformat(ts).timestamp()
@@ -439,9 +425,9 @@ def create_mcp_server(event_bridge: Optional[EventBridge] = None) -> "FastMCP":
     mcp = FastMCP(
         "hermes",
         instructions=(
-            "Hermes Agent messaging bridge. Use these tools to interact with "
-            "conversations across Telegram, Discord, Slack, WhatsApp, Signal, "
-            "Matrix, and other connected platforms."
+            "Hermes Agent enterprise conversation bridge. Use these tools to inspect "
+            "retained conversation state, recent events, and pending approvals "
+            "for CLI or internal API workflows."
         ),
     )
 
@@ -455,13 +441,13 @@ def create_mcp_server(event_bridge: Optional[EventBridge] = None) -> "FastMCP":
         limit: int = 50,
         search: Optional[str] = None,
     ) -> str:
-        """List active messaging conversations across connected platforms.
+        """List active conversations known to the enterprise runtime.
 
         Returns conversations with their session keys (needed for messages_read),
         platform, chat type, display name, and last activity time.
 
         Args:
-            platform: Filter by platform name (telegram, discord, slack, etc.)
+            platform: Optional platform/session source filter
             limit: Maximum number of conversations to return (default 50)
             search: Optional text to filter conversations by name
         """
@@ -697,97 +683,6 @@ def create_mcp_server(event_bridge: Optional[EventBridge] = None) -> "FastMCP":
         if event:
             return json.dumps({"event": event}, indent=2)
         return json.dumps({"event": None, "reason": "timeout"}, indent=2)
-
-    # -- messages_send -----------------------------------------------------
-
-    @mcp.tool()
-    def messages_send(
-        target: str,
-        message: str,
-    ) -> str:
-        """Send a message to a platform conversation.
-
-        The target format is "platform:chat_id" — same format used by the
-        channels_list tool. You can also use human-friendly channel names
-        that will be resolved automatically.
-
-        Examples:
-            target="telegram:6308981865"
-            target="discord:#general"
-            target="slack:#engineering"
-
-        Args:
-            target: Platform target in "platform:identifier" format
-            message: The message text to send
-        """
-        if not target or not message:
-            return json.dumps({"error": "Both target and message are required"})
-
-        try:
-            from tools.send_message_tool import send_message_tool
-            result_str = send_message_tool(
-                {"action": "send", "target": target, "message": message}
-            )
-            return result_str
-        except ImportError:
-            return json.dumps({"error": "Send message tool not available"})
-        except Exception as e:
-            return json.dumps({"error": f"Send failed: {e}"})
-
-    # -- channels_list -----------------------------------------------------
-
-    @mcp.tool()
-    def channels_list(platform: Optional[str] = None) -> str:
-        """List available messaging channels and targets across platforms.
-
-        Returns channels that you can send messages to. The target strings
-        returned here can be used directly with the messages_send tool.
-
-        Args:
-            platform: Filter by platform name (telegram, discord, slack, etc.)
-        """
-        directory = _load_channel_directory()
-        if not directory:
-            entries = _load_sessions_index()
-            targets = []
-            seen = set()
-            for key, entry in entries.items():
-                origin = entry.get("origin", {})
-                p = entry.get("platform") or origin.get("platform", "")
-                chat_id = origin.get("chat_id", "")
-                if not p or not chat_id:
-                    continue
-                if platform and p.lower() != platform.lower():
-                    continue
-                target_str = f"{p}:{chat_id}"
-                if target_str in seen:
-                    continue
-                seen.add(target_str)
-                targets.append({
-                    "target": target_str,
-                    "platform": p,
-                    "name": entry.get("display_name") or origin.get("chat_name", ""),
-                    "chat_type": entry.get("chat_type", origin.get("chat_type", "")),
-                })
-            return json.dumps({"count": len(targets), "channels": targets}, indent=2)
-
-        channels = []
-        for plat, entries_list in directory.items():
-            if platform and plat.lower() != platform.lower():
-                continue
-            if isinstance(entries_list, list):
-                for ch in entries_list:
-                    if isinstance(ch, dict):
-                        chat_id = ch.get("id", ch.get("chat_id", ""))
-                        channels.append({
-                            "target": f"{plat}:{chat_id}" if chat_id else plat,
-                            "platform": plat,
-                            "name": ch.get("name", ch.get("display_name", "")),
-                            "chat_type": ch.get("type", ""),
-                        })
-
-        return json.dumps({"count": len(channels), "channels": channels}, indent=2)
-
     # -- permissions_list_open ---------------------------------------------
 
     @mcp.tool()
@@ -795,7 +690,7 @@ def create_mcp_server(event_bridge: Optional[EventBridge] = None) -> "FastMCP":
         """List pending approval requests observed during this bridge session.
 
         Returns exec and plugin approval requests that the bridge has seen
-        since it started. Approvals are live-session only — older approvals
+        since it started. Approvals are live-session only �?older approvals
         from before the bridge connected are not included.
         """
         approvals = bridge.list_pending_approvals()
@@ -865,3 +760,5 @@ def run_mcp_server(verbose: bool = False) -> None:
         asyncio.run(_run())
     except KeyboardInterrupt:
         bridge.stop()
+
+

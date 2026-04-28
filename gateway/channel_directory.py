@@ -1,9 +1,10 @@
-﻿"""
-Channel directory -- cached map of reachable channels/contacts per platform.
+"""
+Channel directory for legacy session targets.
 
-Built on gateway startup, refreshed periodically (every 5 min), and saved to
-~/.hermes/channel_directory.json.  The send_message tool reads this file for
-action="list" and for resolving human-friendly channel names to numeric IDs.
+The enterprise build no longer exposes cross-platform outbound messaging, but
+older sessions may still carry platform origin metadata. This module keeps a
+lightweight cache of known session targets so compatibility readers can inspect
+historical conversations without importing retired delivery code.
 """
 
 import json
@@ -78,7 +79,7 @@ def build_channel_directory(adapters: Dict[Any, Any]) -> Dict[str, Any]:
 
     # Platforms that don't support direct channel enumeration get session-based
     # discovery automatically.  Skip infrastructure entries that aren't messaging
-    # platforms — everything else falls through to _build_from_sessions().
+    # platforms �� everything else falls through to _build_from_sessions().
     _SKIP_SESSION_DISCOVERY = frozenset({"local", "api_server"})
     for plat in Platform:
         plat_name = plat.value
@@ -107,7 +108,7 @@ def _build_discord(adapter) -> List[Dict[str, str]]:
         return channels
 
     try:
-        import discord as _discord  # noqa: F401 — SDK presence check
+        import discord as _discord  # noqa: F401 �� SDK presence check
     except ImportError:
         return channels
 
@@ -119,7 +120,7 @@ def _build_discord(adapter) -> List[Dict[str, str]]:
                 "guild": guild.name,
                 "type": "channel",
             })
-        # Forum channels (type 15) — creating a message auto-spawns a thread post.
+        # Forum channels (type 15) �� creating a message auto-spawns a thread post.
         forums = getattr(guild, "forum_channels", None) or []
         for ch in forums:
             channels.append({
@@ -138,18 +139,12 @@ def _build_discord(adapter) -> List[Dict[str, str]]:
 
 def _build_slack(adapter) -> List[Dict[str, str]]:
     """List Slack channels the bot has joined."""
-    # Slack adapter may expose a web client
+    # Slack adapter may expose a web client.
     client = getattr(adapter, "_app", None) or getattr(adapter, "_client", None)
     if not client:
         return _build_from_sessions("slack")
 
-    try:
-        from tools.send_message_tool import _send_slack  # noqa: F401
-        # Use the Slack Web API directly if available
-    except Exception:
-        pass
-
-    # Fallback to session data
+    # The enterprise build no longer calls retired outbound delivery helpers.
     return _build_from_sessions("slack")
 
 
@@ -214,9 +209,9 @@ def resolve_channel_name(platform_name: str, name: str) -> Optional[str]:
     Resolve a human-friendly channel name to a numeric ID.
 
     Matching strategy (case-insensitive, first match wins):
-    - Discord: "bot-home", "#bot-home", "GuildName/bot-home"
-    - Telegram: display name or group name
-    - Slack: "engineering", "#engineering"
+    - Bare target name
+    - Display label generated from the cached directory
+    - Guild-qualified Discord name like ``GuildName/channel``
     """
     directory = load_directory()
     channels = directory.get("platforms", {}).get(platform_name, [])
@@ -225,7 +220,7 @@ def resolve_channel_name(platform_name: str, name: str) -> Optional[str]:
 
     query = _normalize_channel_query(name)
 
-    # 1. Exact name match, including the display labels shown by send_message(action="list")
+    # 1. Exact name match, including the display labels shown by compatibility readers
     for ch in channels:
         if _normalize_channel_query(ch["name"]) == query:
             return ch["id"]
@@ -254,9 +249,9 @@ def format_directory_for_display() -> str:
     platforms = directory.get("platforms", {})
 
     if not any(platforms.values()):
-        return "No messaging platforms connected or no channels discovered yet."
+        return "No legacy session targets discovered yet."
 
-    lines = ["Available messaging targets:\n"]
+    lines = ["Available legacy session targets:\n"]
 
     for plat_name, channels in sorted(platforms.items()):
         if not channels:
@@ -288,7 +283,7 @@ def format_directory_for_display() -> str:
                 lines.append(f"  {plat_name}:{_channel_target_name(plat_name, ch)}")
             lines.append("")
 
-    lines.append('Use these as the "target" parameter when sending.')
-    lines.append('Bare platform name (e.g. "telegram") sends to home channel.')
 
     return "\n".join(lines)
+
+

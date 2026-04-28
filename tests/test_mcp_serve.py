@@ -1,10 +1,10 @@
 """
-Tests for mcp_serve — Hermes MCP server.
+Tests for mcp_serve 鈥?Hermes MCP server.
 
 Three layers of tests:
-1. Unit tests — helpers, content extraction, attachment parsing
-2. EventBridge tests — queue mechanics, cursors, waiters, concurrency
-3. End-to-end tests — call actual MCP tools through FastMCP's tool manager
+1. Unit tests 鈥?helpers, content extraction, attachment parsing
+2. EventBridge tests 鈥?queue mechanics, cursors, waiters, concurrency
+3. End-to-end tests 鈥?call actual MCP tools through FastMCP's tool manager
    with real session data in SQLite and sessions.json
 """
 
@@ -208,7 +208,7 @@ def mock_session_db(tmp_path, populated_sessions_dir):
 
 
 # ---------------------------------------------------------------------------
-# 1. UNIT TESTS — helpers, extraction, attachments
+# 1. UNIT TESTS 鈥?helpers, extraction, attachments
 # ---------------------------------------------------------------------------
 
 class TestImports:
@@ -302,7 +302,7 @@ class TestAttachmentExtraction:
 
 
 # ---------------------------------------------------------------------------
-# 2. EVENT BRIDGE TESTS — queue, cursors, waiters, concurrency
+# 2. EVENT BRIDGE TESTS 鈥?queue, cursors, waiters, concurrency
 # ---------------------------------------------------------------------------
 
 class TestEventBridge:
@@ -435,7 +435,7 @@ class TestEventBridge:
 
 
 # ---------------------------------------------------------------------------
-# 3. END-TO-END TESTS — call MCP tools through FastMCP server
+# 3. END-TO-END TESTS 鈥?call MCP tools through FastMCP server
 # ---------------------------------------------------------------------------
 
 @pytest.fixture
@@ -537,7 +537,7 @@ class TestE2EMessagesRead:
         result = _run_tool(server, "messages_read",
                           {"session_key": "agent:main:telegram:dm:123456"})
         assert result["count"] > 0
-        # Should filter out tool messages — only user/assistant
+        # Should filter out tool messages 鈥?only user/assistant
         roles = {m["role"] for m in result["messages"]}
         assert "tool" not in roles
         assert "user" in roles
@@ -690,57 +690,6 @@ class TestE2EEventsWait:
         assert result["event"] is not None
 
 
-class TestE2EMessagesSend:
-    def test_send_missing_args(self, mcp_server_e2e, _event_loop):
-        server, _ = mcp_server_e2e
-        result = _run_tool(server, "messages_send", {"target": "", "message": "hi"})
-        assert "error" in result
-
-    def test_send_delegates_to_tool(self, mcp_server_e2e, _event_loop, monkeypatch):
-        server, _ = mcp_server_e2e
-        mock = MagicMock(return_value=json.dumps({"success": True, "platform": "telegram"}))
-        monkeypatch.setattr("tools.send_message_tool.send_message_tool", mock)
-
-        result = _run_tool(server, "messages_send",
-                          {"target": "telegram:123456", "message": "Hello!"})
-        assert result["success"] is True
-        mock.assert_called_once()
-        call_args = mock.call_args[0][0]
-        assert call_args["action"] == "send"
-        assert call_args["target"] == "telegram:123456"
-
-
-class TestE2EChannelsList:
-    def test_channels_from_sessions(self, mcp_server_e2e, _event_loop):
-        server, _ = mcp_server_e2e
-        result = _run_tool(server, "channels_list")
-        assert result["count"] == 3
-        targets = {c["target"] for c in result["channels"]}
-        assert "telegram:123456" in targets
-        assert "discord:789" in targets
-        assert "slack:C1234" in targets
-
-    def test_channels_platform_filter(self, mcp_server_e2e, _event_loop):
-        server, _ = mcp_server_e2e
-        result = _run_tool(server, "channels_list", {"platform": "slack"})
-        assert result["count"] == 1
-        assert result["channels"][0]["target"] == "slack:C1234"
-
-    def test_channels_with_directory(self, mcp_server_e2e, _event_loop, monkeypatch):
-        import mcp_serve
-        monkeypatch.setattr(mcp_serve, "_load_channel_directory", lambda: {
-            "telegram": [
-                {"id": "123456", "name": "Alice", "type": "dm"},
-                {"id": "-100999", "name": "Dev Group", "type": "group"},
-            ],
-        })
-        # Need to recreate server to pick up the new mock
-        server, bridge = mcp_server_e2e
-        # The tool closure already captured the old mock, so test the function directly
-        directory = mcp_serve._load_channel_directory()
-        assert len(directory["telegram"]) == 2
-
-
 class TestE2EPermissions:
     def test_list_empty(self, mcp_server_e2e, _event_loop):
         server, _ = mcp_server_e2e
@@ -793,7 +742,7 @@ class TestE2EPermissions:
 
 
 # ---------------------------------------------------------------------------
-# 4. TOOL LISTING — verify all 10 tools are registered
+# 4. TOOL LISTING 鈥?verify the enterprise MCP tool surface
 # ---------------------------------------------------------------------------
 
 class TestToolRegistration:
@@ -805,7 +754,6 @@ class TestToolRegistration:
         expected = {
             "conversations_list", "conversation_get", "messages_read",
             "attachments_fetch", "events_poll", "events_wait",
-            "messages_send", "channels_list",
             "permissions_list_open", "permissions_respond",
         }
         assert expected == tool_names, f"Missing: {expected - tool_names}, Extra: {tool_names - expected}"
@@ -925,7 +873,7 @@ class TestEdgeCases:
 
 
 # ---------------------------------------------------------------------------
-# 7. EVENT BRIDGE POLL LOOP E2E — real SQLite DB, mtime optimization
+# 7. EVENT BRIDGE POLL LOOP E2E 鈥?real SQLite DB, mtime optimization
 # ---------------------------------------------------------------------------
 
 class TestEventBridgePollE2E:
@@ -1031,12 +979,12 @@ class TestEventBridgePollE2E:
         db = TestDB()
         bridge = mcp_serve.EventBridge()
 
-        # First poll — should process
+        # First poll 鈥?should process
         bridge._poll_once(db)
         first_calls = db.call_count
         assert first_calls >= 1
 
-        # Second poll — files unchanged, should skip entirely
+        # Second poll 鈥?files unchanged, should skip entirely
         bridge._poll_once(db)
         assert db.call_count == first_calls, \
             "Second poll should skip DB queries when files unchanged"
@@ -1099,7 +1047,7 @@ class TestEventBridgePollE2E:
         sessions_data["agent:main:telegram:dm:new"]["updated_at"] = "2026-03-29T15:00:10"
         (sessions_dir / "sessions.json").write_text(json.dumps(sessions_data))
 
-        # Second poll — should detect the new message
+        # Second poll 鈥?should detect the new message
         bridge._poll_once(db)
         r2 = bridge.poll_events(after_cursor=r1["next_cursor"])
         assert len(r2["events"]) == 1
@@ -1109,3 +1057,4 @@ class TestEventBridgePollE2E:
         """Verify the poll interval constant."""
         from mcp_serve import POLL_INTERVAL
         assert POLL_INTERVAL == 0.2
+

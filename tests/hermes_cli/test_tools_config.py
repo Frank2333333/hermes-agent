@@ -29,16 +29,12 @@ def test_get_platform_tools_uses_default_when_platform_not_configured():
 def test_configurable_toolsets_include_messaging():
     assert any(ts_key == "messaging" for ts_key, _, _ in CONFIGURABLE_TOOLSETS)
 
-def test_get_platform_tools_default_telegram_includes_messaging():
-    enabled = _get_platform_tools({}, "telegram")
+def test_get_platform_tools_default_api_server_matches_enterprise_platforms():
+    enabled = _get_platform_tools({}, "api_server")
 
-    assert "messaging" in enabled
-
-
-def test_get_platform_tools_homeassistant_platform_keeps_homeassistant_toolset():
-    enabled = _get_platform_tools({}, "homeassistant")
-
-    assert "homeassistant" in enabled
+    assert "terminal" in enabled
+    assert "web" in enabled
+    assert "messaging" not in enabled
 
 
 def test_get_platform_tools_preserves_explicit_empty_selection():
@@ -64,19 +60,8 @@ def test_apply_toolset_change_from_default_does_not_enable_default_off_toolsets(
     assert saved.isdisjoint(_DEFAULT_OFF_TOOLSETS)
 
 
-def test_apply_toolset_change_can_enable_default_off_toolset_from_default():
-    config = {}
-
-    with patch("hermes_cli.tools_config.save_config"):
-        _apply_toolset_change(config, "cli", ["homeassistant"], "enable")
-
-    saved = set(config["platform_toolsets"]["cli"])
-    assert "homeassistant" in saved
-    assert "terminal" in saved
-
-
 def test_get_platform_tools_handles_null_platform_toolsets():
-    """YAML `platform_toolsets:` with no value parses as None — the old
+    """YAML `platform_toolsets:` with no value parses as None 鈥?the old
     ``config.get("platform_toolsets", {})`` pattern would then crash with
     ``NoneType has no attribute 'get'`` on the next line. Guard against that.
     """
@@ -217,9 +202,9 @@ def test_save_platform_tools_handles_empty_existing_config():
     config = {}
 
     with patch("hermes_cli.tools_config.save_config"):
-        _save_platform_tools(config, "telegram", {"web", "terminal"})
+        _save_platform_tools(config, "api_server", {"web", "terminal"})
 
-    saved_toolsets = config["platform_toolsets"]["telegram"]
+    saved_toolsets = config["platform_toolsets"]["api_server"]
     assert "web" in saved_toolsets
     assert "terminal" in saved_toolsets
 
@@ -240,7 +225,7 @@ def test_save_platform_tools_handles_invalid_existing_config():
 
 
 def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
-    """Platform default toolsets (hermes-cli, hermes-telegram, etc.) must NOT
+    """Platform default toolsets (hermes-cli, hermes-api-server, etc.) must NOT
     be preserved across saves.
 
     These "super" toolsets resolve to ALL tools, so if they survive in the
@@ -249,7 +234,7 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
     terminal, etc.) and treated platform defaults as unknown custom entries
     (like MCP server names), causing them to be kept unconditionally.
 
-    Regression test: user unchecks image_gen and homeassistant via
+    Regression test: user unchecks image_gen via
     ``hermes tools``, but hermes-cli stays in the config and re-enables
     everything on the next read.
     """
@@ -264,7 +249,7 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
         }
     }
 
-    # User unchecks image_gen, homeassistant, moa — keeps the rest
+    # User unchecks image_gen and messaging while keeping the rest
     new_selection = {
         "browser", "clarify", "code_execution", "cronjob",
         "delegation", "file", "memory", "session_search",
@@ -276,7 +261,7 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
 
     saved = config["platform_toolsets"]["cli"]
 
-    # hermes-cli must NOT survive — it's a platform default, not an MCP server
+    # hermes-cli must NOT survive 鈥?it's a platform default, not an MCP server
     assert "hermes-cli" not in saved
 
     # The individual toolset keys the user selected must be present
@@ -286,16 +271,15 @@ def test_save_platform_tools_does_not_preserve_platform_default_toolsets():
 
     # Tools the user unchecked must NOT be present
     assert "image_gen" not in saved
-    assert "homeassistant" not in saved
-    assert "moa" not in saved
+    assert "messaging" not in saved
 
 
-def test_save_platform_tools_does_not_preserve_hermes_telegram():
-    """Same bug for Telegram — hermes-telegram must not be preserved."""
+def test_save_platform_tools_does_not_preserve_hermes_api_server():
+    """Same bug for API server: hermes-api-server must not be preserved."""
     config = {
         "platform_toolsets": {
-            "telegram": [
-                "browser", "file", "hermes-telegram", "terminal", "web",
+            "api_server": [
+                "browser", "file", "hermes-api-server", "terminal", "web",
             ]
         }
     }
@@ -303,10 +287,10 @@ def test_save_platform_tools_does_not_preserve_hermes_telegram():
     new_selection = {"browser", "file", "terminal", "web"}
 
     with patch("hermes_cli.tools_config.save_config"):
-        _save_platform_tools(config, "telegram", new_selection)
+        _save_platform_tools(config, "api_server", new_selection)
 
-    saved = config["platform_toolsets"]["telegram"]
-    assert "hermes-telegram" not in saved
+    saved = config["platform_toolsets"]["api_server"]
+    assert "hermes-api-server" not in saved
     assert "web" in saved
 
 
@@ -438,7 +422,7 @@ def test_first_install_nous_auto_configures_managed_defaults(monkeypatch):
     assert config["browser"]["cloud_provider"] == "browser-use"
     assert configured == []
 
-# ── Platform / toolset consistency ────────────────────────────────────────────
+# 鈹€鈹€ Platform / toolset consistency 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 
 class TestPlatformToolsetConsistency:
@@ -506,7 +490,7 @@ def test_numeric_mcp_server_name_does_not_crash_sorted():
 
     enabled = _get_platform_tools(config, "cli")
 
-    # All names must be str — no int leaking through
+    # All names must be str 鈥?no int leaking through
     assert all(isinstance(name, str) for name in enabled), (
         f"Non-string toolset names found: {enabled}"
     )
@@ -516,7 +500,7 @@ def test_numeric_mcp_server_name_does_not_crash_sorted():
     sorted(enabled)
 
 
-# ─── Imagegen Backend Picker Wiring ────────────────────────────────────────
+# 鈹€鈹€鈹€ Imagegen Backend Picker Wiring 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
 
 class TestImagegenBackendRegistry:
     """IMAGEGEN_BACKENDS tags drive the model picker flow in tools_config."""
@@ -559,7 +543,7 @@ class TestImagegenModelPicker:
         assert config["image_gen"]["model"].startswith("fal-ai/")
 
     def test_picker_with_gpt_image_does_not_prompt_quality(self):
-        """GPT-Image quality is pinned to medium in the tool's defaults —
+        """GPT-Image quality is pinned to medium in the tool's defaults 鈥?
         no follow-up prompt, no config write for quality_setting."""
         from hermes_cli.tools_config import (
             _configure_imagegen_model,
@@ -570,7 +554,7 @@ class TestImagegenModelPicker:
         ordered = [default_model] + [m for m in model_ids if m != default_model]
         gpt_idx = ordered.index("fal-ai/gpt-image-1.5")
 
-        # Only ONE picker call is expected (for model) — not two (model + quality).
+        # Only ONE picker call is expected (for model) 鈥?not two (model + quality).
         call_count = {"n": 0}
         def fake_prompt(*a, **kw):
             call_count["n"] += 1
@@ -601,3 +585,5 @@ class TestImagegenModelPicker:
             _configure_imagegen_model("fal", config)
         assert isinstance(config["image_gen"], dict)
         assert config["image_gen"]["model"] == "fal-ai/flux-2/klein/9b"
+
+

@@ -16,7 +16,6 @@ Only self-hosted or intranet OpenAI-compatible model endpoints are supported.
 - Public and consumer messaging platforms
 - Public model providers and OAuth login flows
 - `send_message`
-- `web_extract`
 - Cloud browser and cloud extraction backends
 - Non-allowlisted remote MCP endpoints
 
@@ -32,7 +31,7 @@ Only self-hosted or intranet OpenAI-compatible model endpoints are supported.
 ```bash
 hermes
 hermes model
-hermes gateway setup
+hermes gateway run
 ```
 
 The example configuration files in this branch are already trimmed for intranet deployment:
