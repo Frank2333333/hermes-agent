@@ -156,7 +156,7 @@ terminal:
     - ANOTHER_VAR
 ```
 
-See `skills/apple/` for examples of macOS-only skills.
+Set `platforms: [macos]` when a skill should only load on macOS.
 
 ## Secure Setup on Load
 

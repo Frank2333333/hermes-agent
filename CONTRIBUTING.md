@@ -376,7 +376,7 @@ platforms: [macos, linux]     # macOS and Linux
 platforms: [windows]          # Windows only
 ```
 
-If the field is omitted or empty, the skill loads on all platforms (backward compatible). See `skills/apple/` for examples of macOS-only skills.
+If the field is omitted or empty, the skill loads on all platforms (backward compatible).
 
 ### Conditional skill activation
 
